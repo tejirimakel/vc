@@ -63,7 +63,7 @@ export default function MobileHome() {
       {isLoading && (
         <div className="fixed inset-0 flex items-center justify-center bg-white dark:bg-black z-50 animate-fade-out">
           <Image
-            src="/img/vc-2023.jpg"
+            src="/vc-2023.jpg"
             alt="Valuechain Logo"
             width={150}
             height={150}
