@@ -51,7 +51,7 @@ export default function PdfPage() {
           <IoMdArrowRoundBack className="w-6 h-6" />
         </button>
         <Link href='/ecopy'>
-        <h2 className="text-2xl font-bold">Ecopy</h2>
+        <h2 className="text-xl font-bold">Ecopy</h2>
         </Link>
       </nav>
       

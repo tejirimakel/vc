@@ -63,7 +63,7 @@ export default function MobileHome() {
       {isLoading && (
         <div className="fixed inset-0 flex items-center justify-center bg-white dark:bg-black z-50 animate-fade-out">
           <Image
-            src="/vc-2023.jpg"
+            src="/VC-2023.jpg"
             alt="Valuechain Logo"
             width={150}
             height={150}
@@ -80,7 +80,7 @@ export default function MobileHome() {
               <div>
                 <Image
                   className="w-full h-auto"
-                  src="/vc-2023.jpg"
+                  src="/VC-2023.jpg"
                   alt="Valuechain Oil & Gas"
                   width={100}
                   height={100}
@@ -108,7 +108,7 @@ export default function MobileHome() {
                     <div className="relative rounded-lg overflow-hidden shadow-md">
                       <Image
                         className="w-full h-[300px] object-cover"
-                        src={news.image || "/vc-2023.jpg"}
+                        src={news.image || "/VC-2023.jpg"}
                         alt={news.title}
                         width={800}
                         height={800}
@@ -155,7 +155,7 @@ export default function MobileHome() {
                   <li key={news.id} className="flex p-4 bg-white shadow-sm rounded-lg dark:bg-gray-900">
                     <Image
                       className="w-35 h-32 object-cover rounded-lg"
-                      src={news.image || "/vc-2023.jpg"}
+                      src={news.image || "/VC-2023.jpg"}
                       alt={news.title}
                       width={350}
                       height={350}
