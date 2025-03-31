@@ -62,7 +62,7 @@ export default function Videos() {
   }
 
   return (
-    <div className="px-2 py-12">
+    <div className="px-2 pt-14 pb-20">
       <nav className="flex items-center justify-between fixed top-0 left-0 w-full z-50 bg-gray-50 dark:bg-slate-950 px-6 py-4">
         <button
           onClick={handleBack}
@@ -71,7 +71,7 @@ export default function Videos() {
           <IoMdArrowRoundBack className="w-6 h-6" />
         </button>
         <Link href='/video'>
-        <h2 className="text-2xl font-bold">Videos</h2>
+        <h2 className="text-xl font-bold">Videos</h2>
         </Link>
       </nav>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -89,7 +89,7 @@ export default function Videos() {
               allowFullScreen
               className="rounded-lg"
             />
-            <p className="mt-2 font-semibold text-lg">{video.title}</p>
+            <p className="mt-2 font-semibold text-md">{video.title}</p>
           </div>
         ))}
       </div>

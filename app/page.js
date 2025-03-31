@@ -33,7 +33,7 @@ export default function Home() {
             {/* Step 1: Open in Browser */}
             <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
               <Image
-                src="/img/vc-2023.jpg"
+                src="/vc-2023.jpg"
                 alt="Open in browser"
                 width={100}
                 height={100}
@@ -46,7 +46,7 @@ export default function Home() {
             {/* Step 2: Click Install */}
             <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
               <Image
-                src="/img/vc-2023.jpg"
+                src="/vc-2023.jpg"
                 alt="Install Button"
                 width={100}
                 height={100}
@@ -78,7 +78,7 @@ export default function Home() {
             {/* Step 1: Open in Browser */}
             <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
               <Image
-                src="/img/vc-2023.jpg"
+                src="/vc-2023.jpg"
                 alt="Open in browser"
                 width={100}
                 height={100}
@@ -91,7 +91,7 @@ export default function Home() {
             {/* Step 2: Click Install */}
             <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
               <Image
-                src="/img/vc-2023.jpg"
+                src="/vc-2023.jpg"
                 alt="Install Button"
                 width={100}
                 height={100}

@@ -177,9 +177,9 @@ export default function MobileHome() {
               )}
             </ul>
           </div>
-          <Navbar />
         </>
       )}
+        <Navbar />
     </div>
   );
 }
