@@ -89,7 +89,7 @@ export default function NewsArticle() {
       )}
 
       <div className="mt-6 mb-12 dark:text-gray-200 text-base space-y-2">
-        <span className="bg-red-700 p-2 m-auto text-base text-white rounded-lg">{post.categories}</span>
+        <span className="bg-red-700 p-2 m-auto text-sm text-white rounded-lg">{post.categories}</span>
         {cleanContent.split('\n').map((paragraph, index) => (
           <p key={index} className="mt-4 mb-4">
             {paragraph}

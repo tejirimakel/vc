@@ -21,7 +21,7 @@ export default function SplashScreen({ onComplete }) {
       }`}
     >
       <Image
-        src="/img/VC-2023.jpg" // Update to your logo path
+        src="/VC-2023.jpg" // Update to your logo path
         width={200}
         height={200}
         alt="App Logo"

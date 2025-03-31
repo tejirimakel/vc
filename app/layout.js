@@ -28,14 +28,14 @@ export const metadata = {
     description: "Stay updated with TheValueChain live news & streaming service.",
     type: "website",
     url: "https://thevaluechainng.com",
-    image: "/img/VC-2023.jpg",
+    image: "/VC-2023.jpg",
     site_name: "TheValueChain",
   },
   twitter: {
     card: "summary_large_image",
     title: "Thevaluechain Live News & Streaming",
     description: "Watch live news and stay informed with Thevaluechain streaming service.",
-    image: "/img/VC-2023.jpg",
+    image: "/VC-2023.jpg",
   },
 };
 
