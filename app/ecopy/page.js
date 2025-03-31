@@ -61,7 +61,7 @@ export default function PdfPage() {
         <p className="text-center text-red-500 text-xl">{error}</p>
       ) : pdfs.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
             {displayedPdfs.map((pdf, index) => (
               <div key={pdf.id || `pdf-${index}`} className="text-center py-4">
                 <p className="mt-2 text-lg dark:text-neutral-400 font-semibold">{pdf.title}</p>
@@ -69,8 +69,8 @@ export default function PdfPage() {
                   src={pdf.url}
                   type="application/pdf"
                   width="100%"
-                  height="600px"
-                  className="mt-4 rounded-lg shadow-md w-full h-[60vh] sm:h-[70vh] md:h-[600px]"
+                  height="550"
+                  className="mt-4 rounded-lg shadow-md w-full h-[53vh] sm:h-[45vh] md:h-[49vh]"
                 />
               </div>
             ))}
