@@ -68,7 +68,7 @@ export default function RootLayout({ children }) {
         <link rel="icon" href="/apple-icon.png" />
         <link rel="android-chrome" href="/web-app-manifest-512x512.png" />
       </head>
-      <body className="bg-gray-50/90 dark:bg-slate-900">
+      <body className="bg-gray-50 dark:bg-neutral-950">
         {/* <Analytics /> */}
         {children}
       </body>

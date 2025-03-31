@@ -43,15 +43,15 @@ export default function PdfPage() {
 
   return (
     <div className="pt-6 pb-12 px-3">
-      <nav className="flex items-center justify-between fixed top-0 left-0 w-full z-50 bg-gray-50 dark:bg-slate-950 px-6 py-4">
+      <nav className="flex items-center justify-between fixed top-0 left-0 w-full z-50 bg-gray-50/50 dark:bg-neutral-950/50 px-6 py-4">
         <button
           onClick={handleBack}
-          className="text-gray-800 dark:text-gray-100/90 hover:text-gray-600 dark:hover:text-gray-300"
+          className="text-gray-800 dark:text-neutral-100"
         >
           <IoMdArrowRoundBack className="w-6 h-6" />
         </button>
         <Link href='/ecopy'>
-        <h2 className="text-xl font-bold">Ecopy</h2>
+        <h2 className="text-xl dark:text-neutral-100 font-bold">Ecopy</h2>
         </Link>
       </nav>
       
@@ -64,7 +64,7 @@ export default function PdfPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
             {displayedPdfs.map((pdf, index) => (
               <div key={pdf.id || `pdf-${index}`} className="text-center py-4">
-                <p className="mt-2 text-lg font-semibold">{pdf.title}</p>
+                <p className="mt-2 text-lg dark:text-neutral-400 font-semibold">{pdf.title}</p>
                 <embed
                   src={pdf.url}
                   type="application/pdf"
@@ -81,27 +81,27 @@ export default function PdfPage() {
             <div className="flex text-sm justify-center items-center mt-6 space-x-6">
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className={`px-4 py-2 rounded-lg flex items-center ${
+                aria-disabled={currentPage === 1}
+                className={`px-4 py-2 rounded-lg font-semibold flex items-center ${
                   currentPage === 1
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-black text-white hover:bg-red-700"
+                    ? "text-gray-500 dark:text-neutral-800 cursor-not-allowed"
+                : "dark:text-neutral-200 hover:text-red-700"
                 }`}
               >
                 <FaArrowLeft className="mr-2" /> Previous
               </button>
-              <span className="text-lg font-semibold">
+              <span className="text-sm dark:text-neutral-600">
                 Page {currentPage} of {totalPages}
               </span>
               <button
                 onClick={() =>
                   setCurrentPage((prev) => Math.min(prev + 1, totalPages))
                 }
-                disabled={currentPage === totalPages}
-                className={`px-4 py-2 rounded-lg flex items-center ${
+                aria-disabled={currentPage === totalPages}
+                className={`px-4 py-2 rounded-lg font-semibold flex items-center ${
                   currentPage === totalPages
-                    ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                    : "bg-black text-white hover:bg-red-700"
+                    ? "text-gray-500 dark:text-neutral-800 cursor-not-allowed"
+                : "dark:text-neutral-200 hover:text-red-700"
                 }`}
               >
                 Next <FaArrowRight className="ml-2" />

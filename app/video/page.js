@@ -46,8 +46,8 @@ export default function Videos() {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="animate-pulse">
-          <div className="w-80 h-40 bg-gray-300 dark:bg-slate-700 rounded-lg mb-2"></div>
-          <div className="w-56 h-4 bg-gray-300 dark:bg-slate-700 rounded"></div>
+          <div className="w-80 h-40 bg-gray-300 dark:bg-neutral-700 rounded-lg mb-2"></div>
+          <div className="w-56 h-4 bg-gray-300 dark:bg-neutral-700 rounded"></div>
         </div>
       </div>
     );
@@ -63,22 +63,22 @@ export default function Videos() {
 
   return (
     <div className="px-2 pt-14 pb-20">
-      <nav className="flex items-center justify-between fixed top-0 left-0 w-full z-50 bg-gray-50 dark:bg-slate-950 px-6 py-4">
+      <nav className="flex items-center justify-between fixed top-0 left-0 w-full z-50 bg-gray-50/50 dark:bg-neutral-950/50 px-6 py-4">
         <button
           onClick={handleBack}
-          className="text-gray-800 dark:text-gray-100/90 hover:text-gray-600 dark:hover:text-gray-300"
+          className="text-gray-800 dark:text-neutral-100"
         >
           <IoMdArrowRoundBack className="w-6 h-6" />
         </button>
         <Link href='/video'>
-        <h2 className="text-xl font-bold">Videos</h2>
+        <h2 className="text-xl dark:text-neutral-100 font-bold">Videos</h2>
         </Link>
       </nav>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {displayedVideos.map((video, index) => (
           <div
             key={video.id || `video-${index}`}
-            className="p-4 rounded-lg shadow-md bg-white dark:bg-slate-900"
+            className="p-4 rounded-lg shadow-md bg-white dark:bg-neutral-900"
           >
             <iframe
               width="100%"
@@ -89,7 +89,7 @@ export default function Videos() {
               allowFullScreen
               className="rounded-lg"
             />
-            <p className="mt-2 font-semibold text-md">{video.title}</p>
+            <p className="mt-2 font-semibold dark:text-neutral-300 text-md">{video.title}</p>
           </div>
         ))}
       </div>
@@ -99,17 +99,17 @@ export default function Videos() {
         <div className="flex text-sm justify-center items-center mt-6 space-x-6">
           <button
             aria-disabled={currentPage === 1}
-            className={`flex items-center px-4 py-2 rounded-lg ${
+            className={`flex items-center font-semibold px-4 py-2 rounded-lg ${
               currentPage === 1
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-black text-white hover:bg-red-700"
+                ? "text-gray-500 dark:text-neutral-800 cursor-not-allowed"
+                : "dark:text-neutral-200 hover:text-red-700"
             }`}
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
           >
             <FaArrowLeft className="mr-2" /> Previous
           </button>
 
-          <span className="text-sm font-semibold">
+          <span className="text-sm dark:text-neutral-600">
             Page {currentPage} of {totalPages}
           </span>
           <button
@@ -117,10 +117,10 @@ export default function Videos() {
               setCurrentPage((prev) => Math.min(prev + 1, totalPages))
             }
             aria-disabled={currentPage === totalPages}
-            className={`flex items-center px-4 py-2 rounded-lg ${
+            className={`flex items-center font-semibold  px-4 py-2 rounded-lg ${
               currentPage === totalPages
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-black text-white hover:bg-red-700"
+                ? "text-gray-500 dark:text-neutral-800 cursor-not-allowed"
+                : "dark:text-neutral-200 hover:text-red-700"
             }`}
           >
             Next <FaArrowRight className="ml-2" />

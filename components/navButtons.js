@@ -8,12 +8,12 @@ export default function NavButtons({ onBack, onShare }) {
   return (
     <div className="flex justify-between items-center p-4">
       {/* Back Button */}
-      <button onClick={onBack} className="text-gray-800 dark:text-gray-100 hover:text-gray-600 dark:hover:text-gray-300">
+      <button onClick={onBack} className="text-gray-800 dark:text-neutral-100">
         <IoMdArrowRoundBack className="w-6 h-6" />
       </button>
 
       {/* Share Button */}
-      <button onClick={onShare} className="text-gray-800 dark:text-gray-100 hover:text-gray-600 dark:hover:text-gray-300">
+      <button onClick={onShare} className="text-gray-800 dark:text-neutral-100">
         <IoShareSocial className="w-6 h-6" />
       </button>
     </div>

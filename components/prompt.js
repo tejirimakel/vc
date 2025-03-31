@@ -44,7 +44,7 @@ export default function InstallPrompt() {
   return (
     <>
       {isPromptVisible && (
-        <div className="fixed bottom-0 left-0 w-full rounded-t-2xl bg-gray-950 dark:bg-slate-900 text-white px-4 py-6 text-center shadow-md">
+        <div className="fixed bottom-0 left-0 w-full rounded-t-2xl bg-gray-950 dark:bg-neutral-900 text-white px-4 py-6 text-center shadow-md">
           <div className="flex justify-between items-center">
             <p className="flex-grow">Install this app for a better experience!</p>
 

@@ -75,7 +75,7 @@ export default function MobileHome() {
       {/* Show Main Content Only After Splash Screen */}
       {!isLoading && (
         <>
-          <nav className="fixed top-0 left-0 w-full z-50 bg-gray-50/90 dark:bg-slate-950 px-2">
+          <nav className="fixed top-0 left-0 w-full z-50 bg-gray-50/50 dark:bg-neutral-950/50 px-2">
             <div className="flex justify-between items-center p-4">
               <div>
                 <Image
@@ -88,7 +88,7 @@ export default function MobileHome() {
                 />
               </div>
               <div className="flex items-center">
-                <IoMdNotifications className="w-5 h-5 text-gray-800 dark:text-gray-100" />
+                <IoMdNotifications className="w-5 h-5 text-neutral-800 dark:text-gray-200" />
               </div>
             </div>
           </nav>
@@ -134,10 +134,10 @@ export default function MobileHome() {
                       setSelectedCategory(category);
                       router.push(`/mobile?category=${category}`, undefined, { shallow: true });
                     }}
-                    className={`flex items-center text-sm px-3 py-2 rounded-full border border-gray-300 dark:border-gray-600 ${
+                    className={`flex items-center text-sm px-3 py-2 rounded-full border border-gray-300 dark:border-neutral-500 ${
                       selectedCategory === category
-                        ? "bg-red-700 border-none text-white"
-                        : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
+                        ? "bg-red-700 border-none text-white dark:text-neutral-200"
+                        : "bg-gray-100 dark:bg-neutral-400 hover:bg-gray-200 dark:hover:bg-neutral-600 dark:hover:text-neutral-400"
                     }`}
                   >
                     <MdOutlineFeed className="w-5 h-5 mr-1" />
@@ -148,11 +148,11 @@ export default function MobileHome() {
             </div>
 
             {/* News List */}
-            <h2 className="text-xl font-bold mt-6">Latest News</h2>
+            <h2 className="text-xl dark:text-neutral-200 font-bold mt-6">Latest News</h2>
             <ul className="mt-3 space-y-4">
               {filteredNews.length > 0 ? (
                 filteredNews.map((news) => (
-                  <li key={news.id} className="flex p-4 bg-white shadow-sm rounded-lg dark:bg-gray-900">
+                  <li key={news.id} className="flex p-4 bg-white shadow-sm rounded-lg dark:bg-neutral-950">
                     <Image
                       className="w-35 h-32 object-cover rounded-lg"
                       src={news.image || "/VC-2023.jpg"}
@@ -161,13 +161,13 @@ export default function MobileHome() {
                       height={350}
                     />
                     <div className="ml-4 space-y-1 flex-col">
-                      <h3 className="text-md leading-5 font-semibold">{news.title}</h3>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">{generateNewsExcerpt(news.excerpt)}</p>
+                      <h3 className="dark:text-neutral-300 text-md leading-5 font-semibold">{news.title}</h3>
+                      <p className="text-sm text-gray-600 dark:text-neutral-400">{generateNewsExcerpt(news.excerpt)}</p>
                       <div className="flex items-center justify-between">
-                      <Link href={`/news/${news.id}`} className="text-red-700 text-sm font-semibold">
+                      <Link href={`/news/${news.id}`} className="text-red-700 dark:text-red-750 text-sm font-semibold">
                         Read More
                       </Link>
-                      <p className="text-xs text-gray-600">{formatDate(news.date)}</p>
+                      <p className="text-xs text-gray-600 dark:text-neutral-500">{formatDate(news.date)}</p>
                       </div>
                     </div>
                   </li>

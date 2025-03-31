@@ -20,20 +20,20 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-white">
+    <div className="min-h-screen bg-inherit text-gray-800 dark:text-white">
 
       {/* 📱 Mobile View */}
       {isMobile ? (
         <div className="container mx-auto py-8">
           <h1 className="text-3xl font-bold text-center mb-4">Welcome to the Valuechain news & streaming app</h1>
-          <p className="text-center">
+          <p className="text-center mb-4">
           Get instant access without needing to visit the website every time. Just follow these steps:
           </p>
           <div className="max-w-3xl mx-auto grid gap-6 sm:grid-cols-3">
             {/* Step 1: Open in Browser */}
-            <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+            <div className="p-4 bg-white dark:bg-neutral-900 rounded-lg shadow-lg">
               <Image
-                src="/vc-2023.jpg"
+                src="/VC-2023.jpg"
                 alt="Open in browser"
                 width={100}
                 height={100}
@@ -46,7 +46,7 @@ export default function Home() {
             {/* Step 2: Click Install */}
             <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
               <Image
-                src="/vc-2023.jpg"
+                src="/VC-2023.jpg"
                 alt="Install Button"
                 width={100}
                 height={100}
@@ -78,7 +78,7 @@ export default function Home() {
             {/* Step 1: Open in Browser */}
             <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
               <Image
-                src="/vc-2023.jpg"
+                src="/VC-2023.jpg"
                 alt="Open in browser"
                 width={100}
                 height={100}
@@ -91,7 +91,7 @@ export default function Home() {
             {/* Step 2: Click Install */}
             <div className="p-4 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
               <Image
-                src="/vc-2023.jpg"
+                src="/VC-2023.jpg"
                 alt="Install Button"
                 width={100}
                 height={100}

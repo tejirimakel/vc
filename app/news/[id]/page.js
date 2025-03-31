@@ -12,6 +12,11 @@ export default function NewsArticle() {
   const router = useRouter();
   const params = useParams(); // Get URL parameters
   const id = params?.id; // Get the dynamic ID
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Intl.DateTimeFormat('en-US', options).format(date);
+  };
 
   useEffect(() => {
     if (!id) return; // Ensure ID is available before fetching data
@@ -71,11 +76,11 @@ export default function NewsArticle() {
 
   return (
     <div className="container mx-auto py-6">
-      <nav className="fixed top-0 left-0 w-full z-50 bg-gray-50 dark:bg-slate-950 px-2 py-2">
+      <nav className="fixed top-0 left-0 w-full z-50 bg-gray-50/50 dark:bg-neutral-950/50 px-2 py-2">
       <NavButtons onBack={handleBack} onShare={handleShare} />
       </nav>
 
-      <h1 className="text-3xl dark:text-gray-200 font-bold mt-8 mb-4">{post.title}</h1>
+      <h1 className="text-3xl dark:text-neutral-200 font-bold mt-8 mb-4">{post.title}</h1>
 
       {post.image && (
         <Image
@@ -88,10 +93,13 @@ export default function NewsArticle() {
         />
       )}
 
-      <div className="mt-6 mb-12 dark:text-gray-200 text-base space-y-2">
-        <span className="bg-red-700 p-2 m-auto text-sm text-white rounded-lg">{post.categories}</span>
+      <div className="mt-6 mb-12 dark:text-neutral-200 space-y-2">
+        <div className='flex justify-between items-center'>
+        <span className="bg-red-700 p-2 m-0 text-xs text-neutral-200 rounded-lg">{post.categories}</span>
+        <p className="text-xs text-gray-600 dark:text-neutral-400">{formatDate(post.date)}</p>
+        </div>
         {cleanContent.split('\n').map((paragraph, index) => (
-          <p key={index} className="mt-4 mb-4">
+          <p key={index} className="text-base mt-4 mb-4">
             {paragraph}
           </p>
         ))}

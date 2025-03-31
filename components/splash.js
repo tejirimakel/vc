@@ -16,7 +16,7 @@ export default function SplashScreen({ onComplete }) {
 
   return (
     <div
-      className={`fixed inset-0 flex items-center justify-center bg-white dark:bg-black transition-opacity duration-700 ${
+      className={`fixed inset-0 flex items-center justify-center bg-inherit transition-opacity duration-700 ${
         isVisible ? "opacity-100" : "opacity-0"
       }`}
     >

@@ -13,16 +13,16 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 pb-6 px-2 w-full z-50 rounded-t-3xl shadow-md bg-gray-50 dark:bg-gray-900">
+    <nav className="fixed bottom-0 left-0 pb-6 px-2 w-full z-50 rounded-t-3xl shadow-md bg-gray-50 dark:bg-neutral-900">
       <div className="flex justify-between items-center p-4">
         {menu.map((item, index) => (
           <div key={index} className="flex items-center">
             <a
               href={item.link}
-              className="flex items-center text-black dark:text-gray-100"
+              className="flex items-center text-black dark:text-neutral-100"
             >
               <item.icon
-                className="w-6 h-6 text-gray-800 darK:text-red-500 text-gray-900 dark:text-gray-400"
+                className="w-6 h-6 text-gray-900 dark:text-neutral-400"
                 aria-hidden="true"
               />
             </a>
