@@ -49,7 +49,7 @@ export default function MobileHome() {
   }, []);
 
   const generateNewsExcerpt = (p) => {
-    return p?.trim().split(" ").slice(0, 9).join(" ") + "...";
+    return p?.trim().split(" ").slice(0, 7).join(" ") + "...";
   };
 
   const filteredNews =
@@ -63,7 +63,7 @@ export default function MobileHome() {
       {isLoading && (
         <div className="fixed inset-0 flex items-center justify-center bg-white dark:bg-black z-50 animate-fade-out">
           <Image
-            src="/vc-2023.jpg"
+            src="/img/vc-2023.jpg"
             alt="Valuechain Logo"
             width={150}
             height={150}
@@ -116,7 +116,7 @@ export default function MobileHome() {
                         priority
                       />
                       <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white p-3">
-                        <h2 className="text-2xl font-semibold">{news.title}</h2>
+                        <h2 className="text-xl font-semibold">{news.title}</h2>
                       </div>
                     </div>
                   </Link>
@@ -134,7 +134,7 @@ export default function MobileHome() {
                       setSelectedCategory(category);
                       router.push(`/mobile?category=${category}`, undefined, { shallow: true });
                     }}
-                    className={`flex items-center px-4 py-2 rounded-full border border-gray-300 dark:border-gray-600 ${
+                    className={`flex items-center text-sm px-4 py-2 rounded-full border border-gray-300 dark:border-gray-600 ${
                       selectedCategory === category
                         ? "bg-red-700 border-none text-white"
                         : "bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700"
@@ -160,11 +160,11 @@ export default function MobileHome() {
                       width={350}
                       height={350}
                     />
-                    <div className="ml-4 space-y-1">
-                      <h3 className="text-lg leading-6 font-semibold">{news.title}</h3>
+                    <div className="ml-4 space-y-1 flex-col">
+                      <h3 className="text-md leading-5 font-semibold">{news.title}</h3>
                       <p className="text-sm text-gray-600 dark:text-gray-400">{generateNewsExcerpt(news.excerpt)}</p>
                       <div className="flex items-center justify-between">
-                      <Link href={`/news/${news.id}`} className="text-red-700 text-md font-semibold">
+                      <Link href={`/news/${news.id}`} className="text-red-700 text-sm font-semibold">
                         Read More
                       </Link>
                       <p className="text-xs text-gray-600">{formatDate(news.date)}</p>

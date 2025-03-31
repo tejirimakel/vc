@@ -13,7 +13,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 w-full z-50 rounded-t-3xl shadow-md bg-gray-50 dark:bg-gray-900">
+    <nav className="fixed bottom-0 left-0 pb-6 w-full z-50 rounded-t-3xl shadow-md bg-gray-50 dark:bg-gray-900">
       <div className="flex justify-around items-center p-4">
         {menu.map((item, index) => (
           <div key={index} className="flex items-center">
