@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { IoMdArrowRoundBack } from "react-icons/io";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import Link from "next/link";
-
+import PdfViewerComponent from "@/components/PdfViewerComponent";
 
 export default function PdfPage() {
   const [pdfs, setPdfs] = useState([]);
@@ -15,10 +15,6 @@ export default function PdfPage() {
   const pdfsPerPage = 6; // Number of PDFs per page
   const router = useRouter();
 
-  const handleBack = () => {
-    router.back();
-  };
-
   useEffect(() => {
     async function fetchData() {
       try {
@@ -27,7 +23,7 @@ export default function PdfPage() {
           throw new Error("Failed to fetch PDFs");
         }
         const data = await response.json();
-        setPdfs(data.pdfs || []); // Ensure pdfs is always an array
+        setPdfs(data.pdfs || []);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -44,37 +40,28 @@ export default function PdfPage() {
   const displayedPdfs = pdfs.slice(startIndex, startIndex + pdfsPerPage);
 
   return (
-    <div className="pt-6 pb-12 px-3">
-      <nav className="flex items-center justify-between fixed top-0 left-0 w-full z-50 bg-gray-50/50 dark:bg-neutral-950/50 px-6 py-4">
-        <button
-          onClick={handleBack}
-          className="text-gray-800 dark:text-neutral-100"
-        >
+    <div className="pt-12 pb-12 px-3">
+      {/* Top Navigation Bar */}
+      <nav className="flex items-center justify-between fixed top-0 left-0 w-full z-50 bg-gray-50/90 dark:bg-neutral-950/50 px-6 py-4">
+        <button onClick={() => router.back()} className="text-gray-800 dark:text-neutral-100">
           <IoMdArrowRoundBack className="w-6 h-6" />
         </button>
-        <Link href='/ecopy'>
-        <h2 className="text-xl dark:text-neutral-100 font-bold">Ecopy</h2>
+        <Link href="/ecopy">
+          <h2 className="text-xl dark:text-neutral-100 font-bold">Ecopy</h2>
         </Link>
       </nav>
-      
+
+      {/* Loading or Error Handling */}
       {loading ? (
         <p className="text-center text-xl">Loading PDFs...</p>
       ) : error ? (
         <p className="text-center text-red-500 text-xl">{error}</p>
       ) : pdfs.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-            {displayedPdfs.map((pdf, index) => (
-              <div key={pdf.id || `pdf-${index}`} className="text-center py-4">
-                <p className="mt-2 text-lg dark:text-neutral-400 font-semibold">{pdf.title}</p>
-                <embed
-                  src={pdf.url}
-                  type="application/pdf"
-                  width="100%"
-                  height="550"
-                  className="mt-4 rounded-lg shadow-md w-full h-[53vh] sm:h-[45vh] md:h-[49vh]"
-                />
-              </div>
+          {/* PDF Viewer Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            {displayedPdfs.map((pdf) => (
+              <PdfViewerComponent key={pdf.id} pdfUrl={pdf.url} />
             ))}
           </div>
 
@@ -83,11 +70,9 @@ export default function PdfPage() {
             <div className="flex text-sm justify-center items-center mt-6 space-x-6">
               <button
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                aria-disabled={currentPage === 1}
+                disabled={currentPage === 1}
                 className={`px-4 py-2 rounded-lg font-semibold flex items-center ${
-                  currentPage === 1
-                    ? "text-gray-500 dark:text-neutral-800 cursor-not-allowed"
-                : "dark:text-neutral-200 hover:text-red-700"
+                  currentPage === 1 ? "text-gray-500 cursor-not-allowed" : "hover:text-red-700"
                 }`}
               >
                 <FaArrowLeft className="mr-2" /> Previous
@@ -96,14 +81,10 @@ export default function PdfPage() {
                 Page {currentPage} of {totalPages}
               </span>
               <button
-                onClick={() =>
-                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                }
-                aria-disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
                 className={`px-4 py-2 rounded-lg font-semibold flex items-center ${
-                  currentPage === totalPages
-                    ? "text-gray-500 dark:text-neutral-800 cursor-not-allowed"
-                : "dark:text-neutral-200 hover:text-red-700"
+                  currentPage === totalPages ? "text-gray-500 cursor-not-allowed" : "hover:text-red-700"
                 }`}
               >
                 Next <FaArrowRight className="ml-2" />
@@ -114,6 +95,8 @@ export default function PdfPage() {
       ) : (
         <p className="text-center text-xl">No PDFs available.</p>
       )}
+
+      {/* Bottom Navbar */}
       <Navbar />
     </div>
   );

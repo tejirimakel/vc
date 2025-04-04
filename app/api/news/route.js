@@ -2,7 +2,7 @@
 export async function GET() {
   try {
     const response = await fetch(process.env.WORDPRESS_API_URL, {
-      next: { revalidate: 86400 }, // Cache for 24 hours
+      next: { revalidate: 43200 }, // Cache for 12 hours
     });
     const data = await response.json();
 

@@ -1,3 +1,5 @@
+const { optimizeImage } = require('next/dist/server/image-optimizer');
+
 /** @type {import('next').NextConfig} */
 const withPWA = require("next-pwa")({
   dest: "public",
@@ -8,52 +10,37 @@ const withPWA = require("next-pwa")({
 });
 
 const nextConfig = {
-  reactStrictMode: true, // Enable strict mode for React
+  reactStrictMode: true,
   images: {
-    remotePatterns:[
+    remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'thevaluechainng.com',
-    
+        protocol: "https",
+        hostname: "thevaluechainng.com",
       },
       {
-        protocol: 'https',
-        hostname: 'www.thevaluechainng.com',
-       
+        protocol: "https",
+        hostname: "www.thevaluechainng.com",
       },
-    ]
+    ],
+  },
+  webpack: (config) => {
+    config.module.rules.push({
+      test: /pdf\.worker\.(min\.)?js/,
+      use: "file-loader",
+    });
+
+    return config;
   },
   experimental: {
-    turbo:{
+    turbo: {
       enabled: true,
       streaming: true,
-      strategy: 'async-dom',
+      strategy: "async-dom",
       ssr: false,
       minify: true,
-      lazy: true,
-      prefetch: true,
-      optimizeImages: true,
-      optimizeCss: true,
-      optimizeFonts: true,
-      minifyHtml: true,
-      minifyJs: true,
-      minifyJson: true,
-      minifySvg: true,
-      minifyCSS: true,
-      minifyUrls: true,
-      minifyManifest: true,
-      minifyWebManifest: true,
-      minifyPreload: true,
-      minifyServiceWorker: true,
-      minifyWorker: true,
-      minifyStreaming: true,
-      minifyPwaManifest: true,
-      minifyPwaUpdateManifest: true,
-      minifyPwaIcons: true,
-      minifyPwaSplashScreen: true,
-      minifyPwaSplashScreenIos: true,
-    } 
-},
+      optimizeImage: true,
+    },
+  },
 };
 
 module.exports = withPWA(nextConfig);
