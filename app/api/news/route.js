@@ -1,9 +1,7 @@
 // /app/api/news/route.js
 export async function GET() {
   try {
-    const response = await fetch(process.env.WORDPRESS_API_URL, {
-      next: { revalidate: 43200 }, // Cache for 12 hours
-    });
+    const response = await fetch(process.env.WORDPRESS_API_URL);
     const data = await response.json();
 
     // Prepare categories (you may customize the filtering logic)
