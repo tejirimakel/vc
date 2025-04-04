@@ -7,7 +7,7 @@ import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import "swiper/css";
-import { MdOutlineFeed } from "react-icons/md";
+//import { MdOutlineFeed } from "react-icons/md";
 import { IoMdNotifications } from "react-icons/io";
 import { useRouter } from "next/navigation";
 
@@ -21,8 +21,8 @@ export default function MobileHome() {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Intl.DateTimeFormat('en-US', options).format(date);
+    const options = { year: "numeric", month: "long", day: "numeric" };
+    return new Intl.DateTimeFormat("en-US", options).format(date);
   };
 
   useEffect(() => {
@@ -49,13 +49,22 @@ export default function MobileHome() {
   }, []);
 
   const generateNewsExcerpt = (p) => {
-    return p?.trim().split(" ").slice(0, 7).join(" ") + "...";
+    return p?.trim().split(" ").slice(0, 4).join(" ") + "...";
+  };
+
+  const cutTitle = (t) => {
+    return (
+      t?.trim().split(" ").slice(0, 14).join(" ") +
+      (t.split(" ").length > 14 ? "." : "")
+    );
   };
 
   const filteredNews =
     selectedCategory === "All"
       ? newsFeed.slice(0, 10)
-      : newsFeed.filter((post) => post.categories.includes(selectedCategory)).slice(0, 10);
+      : newsFeed
+          .filter((post) => post.categories.includes(selectedCategory))
+          .slice(0, 10);
 
   return (
     <div className="h-auto bg-inherit">
@@ -126,21 +135,23 @@ export default function MobileHome() {
 
             {/* Filter Tabs */}
             <div className="mt-6">
-              <div className="mt-3 flex overflow-x-auto space-x-3 scrollbar-hide">
+              <div className="mt-3 flex overflow-x-auto space-x-3 no-scrollbar">
                 {categories.map((category) => (
                   <button
                     key={category}
                     onClick={() => {
                       setSelectedCategory(category);
-                      router.push(`/mobile?category=${category}`, undefined, { shallow: true });
+                      router.push(`/mobile?category=${category}`, undefined, {
+                        shallow: true,
+                      });
                     }}
-                    className={`flex items-center text-sm px-3 py-2 rounded-full border border-gray-300 dark:border-neutral-500 ${
+                    className={`flex items-center mx-1 text-sm px-8 py-2 rounded-full border border-gray-300 dark:border-neutral-500 ${
                       selectedCategory === category
                         ? "bg-red-700 border-none text-white dark:text-neutral-200"
                         : "bg-gray-100 dark:bg-neutral-400 hover:bg-gray-200 dark:hover:bg-neutral-600 dark:hover:text-neutral-400"
                     }`}
                   >
-                    <MdOutlineFeed className="w-5 h-5 mr-1" />
+                    {/* Trim the category text to 12 characters max */}
                     {category}
                   </button>
                 ))}
@@ -148,38 +159,48 @@ export default function MobileHome() {
             </div>
 
             {/* News List */}
-            <h2 className="text-xl dark:text-neutral-200 font-bold mt-6">Latest News</h2>
+            <h2 className="text-xl dark:text-neutral-200 font-bold mt-6">
+              Latest News
+            </h2>
             <ul className="mt-3 space-y-4">
               {filteredNews.length > 0 ? (
                 filteredNews.map((news) => (
-                  <li key={news.id} className="flex p-4 bg-white shadow-sm rounded-lg dark:bg-neutral-950">
+                  <li
+                    key={news.id}
+                    className="flex p-4 bg-white shadow-sm rounded-lg dark:bg-neutral-950"
+                  >
                     <Image
-                      className="w-35 h-32 object-cover rounded-lg"
+                      className="min-w-32 h-32 object-cover rounded-lg"
                       src={news.image || "/VC-2023.jpg"}
                       alt={news.title}
                       width={350}
                       height={350}
                     />
-                    <div className="ml-4 space-y-1 flex-col">
-                      <h3 className="dark:text-neutral-300 text-md leading-5 font-semibold">{news.title}</h3>
-                      <p className="text-sm text-gray-600 dark:text-neutral-400">{generateNewsExcerpt(news.excerpt)}</p>
-                      <div className="flex items-center justify-between">
-                      <Link href={`/news/${news.id}`} className="text-red-700 dark:text-red-750 text-sm font-semibold">
-                        Read More
-                      </Link>
-                      <p className="text-xs text-gray-600 dark:text-neutral-500">{formatDate(news.date)}</p>
+                    <Link
+                      href={`/news/${news.id}`}
+                      
+                    >
+                      <div className="ml-4 space-y-1 flex-col">
+                        <h3 className="dark:text-neutral-300 text-md leading-5 font-semibold">
+                          {cutTitle(news.title)}
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-neutral-400">
+                          {generateNewsExcerpt(news.excerpt)}
+                        </p>
                       </div>
-                    </div>
+                    </Link>
                   </li>
                 ))
               ) : (
-                <p className="text-gray-500">No news available in this category.</p>
+                <p className="text-gray-500">
+                  No news available in this category.
+                </p>
               )}
             </ul>
           </div>
         </>
       )}
-        <Navbar />
+      <Navbar />
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { parseStringPromise } from 'xml2js';
+import { parseStringPromise } from "xml2js";
 
 export async function GET() {
   const channelId = process.env.CHANNEL_ID;
@@ -29,19 +29,24 @@ export async function GET() {
         title: entry.title[0],
         thumbnailUrl: entry["media:group"][0]["media:thumbnail"][0].$.url, // Fix structure
         published: entry.published ? entry.published[0] : "Unknown",
-        description: entry.summary ? entry.summary[0] : "No description available",
+        description: entry.summary
+          ? entry.summary[0]
+          : "No description available",
       };
     });
 
     // Return JSON response
     return new Response(JSON.stringify({ items }), {
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "public, max-age=86400",
+      },
     });
   } catch (error) {
     console.error("Error fetching YouTube data:", error);
-    return new Response(
-      JSON.stringify({ error: "Failed to fetch videos" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
-    );
+    return new Response(JSON.stringify({ error: "Failed to fetch videos" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }
