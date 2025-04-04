@@ -170,7 +170,7 @@ export default function MobileHome() {
                     className="flex p-4 bg-white shadow-sm rounded-lg dark:bg-neutral-950"
                   >
                     <Image
-                      className="min-w-32 h-32 object-cover rounded-lg"
+                      className="min-w-30 w-30 h-30 object-cover rounded-lg"
                       src={news.image || "/VC-2023.jpg"}
                       alt={news.title}
                       width={350}
