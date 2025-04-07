@@ -4,12 +4,15 @@ export function middleware(req) {
   const url = req.nextUrl;
   const protectedRoutes = ["/mobile", "/news", "/ecopy", "/stream", "/video"];
 
-  // Detect if the request is coming from a web browser
-  const userAgent = req.headers.get("user-agent") || "";
-  const isBrowser = /Chrome|Safari|Firefox|Edge|Opera|MSIE|Trident/.test(userAgent);
+  // Check if the requested path is in the protected routes
+  if (protectedRoutes.some((path) => url.pathname.startsWith(path))) {
+    // Detect if the app is installed as a PWA or in standalone mode
+    const isPwaSupported =
+      req.headers.get("sec-ch-ua-mobile") || req.cookies.get("pwa-installed");
 
-  if (protectedRoutes.some((path) => url.pathname.startsWith(path)) && isBrowser) {
-    return NextResponse.redirect(new URL("/", req.url)); // Redirect unauthorized access
+    if (!isPwaSupported) {
+      return NextResponse.redirect(new URL("/", req.url)); // Redirect unauthorized users
+    }
   }
 
   return NextResponse.next();
