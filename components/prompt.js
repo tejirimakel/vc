@@ -78,7 +78,6 @@ export default function InstallPrompt() {
             </button>
           </div>
 
-          {/* Check if the environment supports PWA installation */}
           {navigator.standalone || 'serviceWorker' in navigator ? (
             // Show install button for compatible browsers (PWA installation supported)
             <button
@@ -88,7 +87,7 @@ export default function InstallPrompt() {
               Install
             </button>
           ) : (
-            // Custom prompt for iOS users who can't use the standard prompt
+            // Custom prompt for iOS
             <p className="mt-2">Tap the Share icon and then select Add to Home Screen.</p>
           )}
         </div>
