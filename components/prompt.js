@@ -9,11 +9,11 @@ export default function InstallPrompt() {
   const router = useRouter();
 
   useEffect(() => {
-    // Detect if the app is in PWA supported mode
-    const isPwaSupported = window.matchMedia("(display-mode: standalone)").matches || 'serviceWorker' in navigator;
+    // Check if the app is in PWA mode (installed and standalone)
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
 
-    // If the app is already installed or PWA supported, redirect to the mobile interface
-    if (isPwaSupported) {
+    // If the app is installed or running as a PWA, redirect to the mobile interface
+    if (isStandalone) {
       router.replace("/mobile");
       return;
     }
