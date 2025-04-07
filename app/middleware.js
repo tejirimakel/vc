@@ -2,17 +2,17 @@ import { NextResponse } from "next/server";
 
 export function middleware(req) {
   const url = req.nextUrl;
-  const protectedRoutes = ["/mobile", "/news", "/ecopy", "/stream", "/video"];
+  const protectedRoutes = ["/mobile", "/video", "/ecopy", "/news", "/stream"];
 
   // Check if the requested path is in the protected routes
   if (protectedRoutes.some((path) => url.pathname.startsWith(path))) {
-    // Check if the app is in PWA mode or if the user has installed it (via cookies or user-agent)
-    const isPwaInstalled =
-      req.headers.get("sec-ch-ua-mobile") || req.cookies.get("pwa-installed");
+    // Check if the app is running in standalone mode (PWA mode) or in a browser
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+    const isMobile = req.headers.get("sec-ch-ua-mobile");
 
-    // If not installed as PWA, redirect to home page or show a custom message
-    if (!isPwaInstalled) {
-      return NextResponse.redirect(new URL("/", req.url)); // Redirect to home
+    // If not in standalone mode (i.e., it's a web browser), redirect to the home page
+    if (!isStandalone) {
+      return NextResponse.redirect(new URL("/", req.url)); // Redirect to homepage if accessed via browser
     }
   }
 
@@ -21,5 +21,5 @@ export function middleware(req) {
 
 // Apply middleware to the protected routes
 export const config = {
-  matcher: ["/mobile/:path*", "/news/:path*", "/ecopy/:path*", "/stream/:path*", "/video/:path*"],
+  matcher: ["/mobile/:path*", "/video/:path*", "/ecopy/:path*", "/news/:path*", "/stream/:path*"],
 };
