@@ -1,12 +1,21 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { IoClose } from "react-icons/io5"; // Import close icon
 
 export default function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isPromptVisible, setIsPromptVisible] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+
+    if (isStandalone) {
+      router.replace("/mobile"); // Redirect to the mobile app interface if installed
+      return;
+    }
+
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -18,7 +27,7 @@ export default function InstallPrompt() {
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
     };
-  }, []);
+  }, [router]);
 
   const handleInstallClick = () => {
     if (deferredPrompt) {
@@ -26,6 +35,7 @@ export default function InstallPrompt() {
       deferredPrompt.userChoice
         .then((choiceResult) => {
           if (choiceResult.outcome === "accepted") {
+            document.cookie = "pwa-installed=true; path=/; max-age=31536000"; // 1-year expiry
             setIsPromptVisible(false);
           }
           setDeferredPrompt(null);
@@ -36,7 +46,6 @@ export default function InstallPrompt() {
     }
   };
 
-  // Handle closing the prompt
   const handleClose = () => {
     setIsPromptVisible(false);
   };

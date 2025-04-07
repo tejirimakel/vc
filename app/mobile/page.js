@@ -136,25 +136,28 @@ export default function MobileHome() {
             {/* Filter Tabs */}
             <div className="mt-6">
               <div className="mt-3 flex overflow-x-auto space-x-3 no-scrollbar">
-                {categories.map((category) => (
-                  <button
-                    key={category}
-                    onClick={() => {
-                      setSelectedCategory(category);
-                      router.push(`/mobile?category=${category}`, undefined, {
-                        shallow: true,
-                      });
-                    }}
-                    className={`flex items-center mx-1 text-sm px-8 py-2 rounded-full border border-gray-300 dark:border-neutral-500 ${
-                      selectedCategory === category
-                        ? "bg-red-700 border-none text-white dark:text-neutral-200"
-                        : "bg-gray-100 dark:bg-neutral-400 hover:bg-gray-200 dark:hover:bg-neutral-600 dark:hover:text-neutral-400"
-                    }`}
-                  >
-                    {/* Trim the category text to 12 characters max */}
-                    {category}
-                  </button>
-                ))}
+                {categories.map((category) => {
+                  const singleWordCategory = category.split(" ")[0]; // Extract first word only
+
+                  return (
+                    <button
+                      key={category}
+                      onClick={() => {
+                        setSelectedCategory(category);
+                        router.push(`/mobile?category=${category}`, undefined, {
+                          shallow: true,
+                        });
+                      }}
+                      className={`flex items-center mx-1 text-sm px-8 py-2 rounded-full border border-gray-300 dark:border-neutral-500 ${
+                        selectedCategory === category
+                          ? "bg-red-700 border-none text-white dark:text-neutral-200"
+                          : "bg-gray-100 dark:bg-neutral-400 hover:bg-gray-200 dark:hover:bg-neutral-600 dark:hover:text-neutral-400"
+                      }`}
+                    >
+                      {singleWordCategory}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -176,10 +179,7 @@ export default function MobileHome() {
                       width={350}
                       height={350}
                     />
-                    <Link
-                      href={`/news/${news.id}`}
-                      
-                    >
+                    <Link href={`/news/${news.id}`}>
                       <div className="ml-4 space-y-1 flex-col">
                         <h3 className="dark:text-neutral-300 text-md leading-5 font-semibold">
                           {cutTitle(news.title)}

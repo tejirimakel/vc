@@ -1,24 +1,26 @@
-// /app/api/news/route.js
 export async function GET() {
   try {
     // Fetch data from WordPress API
     const response = await fetch(process.env.WORDPRESS_API_URL, {
-      next: { revalidate: 86400 }, // Cache for 24 hours (86400 seconds)
+      next: { revalidate: 86400 }, // Cache for 24 hours
     });
 
     if (!response.ok) throw new Error("Failed to fetch data");
 
     const data = await response.json();
 
-    // Prepare categories (you may customize the filtering logic)
-    const categories = [...new Set(data.flatMap((post) => post.categories || ["Uncategorized"]))];
+    // Sort news in descending order (latest first)
+    const sortedNews = data.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    // Return the processed data with caching headers
+    // Prepare categories
+    const categories = [...new Set(sortedNews.flatMap((post) => post.categories || ["Uncategorized"]))];
+
+    // Return the processed data
     return new Response(
       JSON.stringify({
-        newsFeed: data.slice(0, 10),  // Limit to 10 posts
+        newsFeed: sortedNews.slice(0, 10),  // Limit to 10 latest posts
         categories,
-        trendingNews: data.slice(0, 5)  // Limit to 5 trending posts
+        trendingNews: sortedNews.slice(0, 5)  // Limit to 5 latest trending posts
       }),
       {
         status: 200,

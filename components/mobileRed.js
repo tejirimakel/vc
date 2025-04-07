@@ -6,9 +6,12 @@ export default function MobileRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    // Check if the app is running as a PWA
-    if (window.matchMedia("(display-mode: standalone)").matches) {
-      router.push("/mobile"); // Redirect to the mobile-optimized page
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+
+    if (isStandalone) {
+      router.replace("/mobile"); // Redirect to mobile PWA view
+    } else {
+      router.replace("/"); // Ensure browser users stay on main index page
     }
   }, [router]);
 

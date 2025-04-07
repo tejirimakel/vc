@@ -40,7 +40,7 @@ export default function PdfPage() {
   const displayedPdfs = pdfs.slice(startIndex, startIndex + pdfsPerPage);
 
   return (
-    <div className="pt-12 pb-12 px-3">
+    <div className="pt-12 pb-20 px-3">
       {/* Top Navigation Bar */}
       <nav className="flex items-center justify-between fixed top-0 left-0 w-full z-50 bg-gray-50/90 dark:bg-neutral-950/50 px-6 py-4">
         <button onClick={() => router.back()} className="text-gray-800 dark:text-neutral-100">
@@ -61,7 +61,7 @@ export default function PdfPage() {
           {/* PDF Viewer Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             {displayedPdfs.map((pdf) => (
-              <PdfViewerComponent key={pdf.id} pdfUrl={pdf.url} />
+              <PdfViewerComponent className="rounded-lg" key={pdf.id} pdfUrl={pdf.url} />
             ))}
           </div>
 
