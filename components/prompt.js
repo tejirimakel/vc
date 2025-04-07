@@ -9,10 +9,11 @@ export default function InstallPrompt() {
   const router = useRouter();
 
   useEffect(() => {
-    const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+    // Detect if the app is in PWA supported mode
+    const isPwaSupported = window.matchMedia("(display-mode: standalone)").matches || 'serviceWorker' in navigator;
 
-    // If the app is already installed, redirect to the mobile interface
-    if (isStandalone) {
+    // If the app is already installed or PWA supported, redirect to the mobile interface
+    if (isPwaSupported) {
       router.replace("/mobile");
       return;
     }
@@ -77,7 +78,8 @@ export default function InstallPrompt() {
             </button>
           </div>
 
-          {window.matchMedia("(display-mode: standalone)").matches ? (
+          {navigator.standalone || 'serviceWorker' in navigator ? (
+            // Show install button for compatible browsers (PWA installation supported)
             <button
               onClick={handleInstallClick}
               className="bg-red-700 text-white px-4 py-2 rounded mt-4"
@@ -85,6 +87,7 @@ export default function InstallPrompt() {
               Install
             </button>
           ) : (
+            // Custom prompt for iOS
             <p className="mt-2">Tap the Share icon and then select Add to Home Screen.</p>
           )}
         </div>
