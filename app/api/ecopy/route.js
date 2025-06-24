@@ -10,7 +10,7 @@ export async function GET() {
 
     // Filter PDFs that contain "Value Chain" in their title (case insensitive) and have a date starting with "2025"
     const filteredPdfs = pdfs
-      .filter((pdf) => /value\s?chain/i.test(pdf.title) && pdf.date?.startsWith("2025"))
+      .filter((pdf) => /value\s?chain/i.test(pdf.title) && pdf.date?.startsWith("2025") && pdf.url)
       .sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by date (latest first)
 
     return new Response(JSON.stringify({ pdfs: filteredPdfs }), {

@@ -36,7 +36,7 @@ registerRoute(
 );
 
 // 📌 PDF Caching (Cache-First, Never Expires)
-const PDF_API_URL = process.env.ECOPY_API_URL || 'https://your-api.com';
+const PDF_API_URL = process.env.ECOPY_API_URL || '#';
 
 registerRoute(
   ({ request, url }) =>

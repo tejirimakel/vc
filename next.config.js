@@ -1,5 +1,3 @@
-const { optimizeImage } = require('next/dist/server/image-optimizer');
-
 /** @type {import('next').NextConfig} */
 const withPWA = require("next-pwa")({
   dest: "public",
@@ -23,23 +21,15 @@ const nextConfig = {
       },
     ],
   },
-  webpack: (config) => {
+  webpack(config) {
     config.module.rules.push({
-      test: /pdf\.worker\.(min\.)?js/,
-      use: "file-loader",
+      test: /pdf\.worker\.(min\.)?js$/,
+      use: {
+        loader: 'file-loader',
+      },
     });
-
+    config.resolve.extensions.push('.mjs');
     return config;
-  },
-  experimental: {
-    turbo: {
-      enabled: true,
-      streaming: true,
-      strategy: "async-dom",
-      ssr: false,
-      minify: true,
-      optimizeImage: true,
-    },
   },
 };
 

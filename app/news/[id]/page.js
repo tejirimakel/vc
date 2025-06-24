@@ -1,10 +1,11 @@
 'use client';
 import Image from 'next/image';
 import Navbar from '@/components/nav';
-import { notFound } from 'next/navigation';
 import NavButtons from '@/components/navButtons';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { decode } from 'he';
+
 
 export default function NewsArticle() {
   const [newsFeed, setNewsFeed] = useState([]);
@@ -44,9 +45,8 @@ export default function NewsArticle() {
   // Find the post with the matching ID
   const post = newsFeed.find((newsItem) => newsItem.id.toString() === id);
 
-  if (!post) {
-    notFound(); // If the post doesn't exist, return a 404 page
-  }
+    if (!post) return <p className="text-center text-red-600">Article not found.</p>;
+
 
   const handleBack = () => {
     router.back();
@@ -69,10 +69,11 @@ export default function NewsArticle() {
     }
   };
 
-  const cleanContent = post.content
-    .replace(/<\/?p>/g, '') // Remove opening and closing <p> tags
-    .replace(/<[^>]+>/g, '') // Remove all other HTML tags
-    .trim();
+  const cleanContent = decode(post.content || '')
+  .replace(/<\/?p>/g, '')
+  .replace(/<[^>]+>/g, '')
+  .trim();
+
 
   return (
     <div className="container mx-auto py-6">
@@ -80,7 +81,8 @@ export default function NewsArticle() {
       <NavButtons onBack={handleBack} onShare={handleShare} />
       </nav>
 
-      <h1 className="text-3xl dark:text-neutral-200 font-bold mt-8 mb-4">{post.title}</h1>
+      <h1 className="text-xl sm:text-3xl font-bold dark:text-neutral-200 mt-8 mb-4">
+{post.title}</h1>
 
       {post.image && (
         <Image

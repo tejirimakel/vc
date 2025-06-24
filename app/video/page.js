@@ -74,11 +74,11 @@ export default function Videos() {
         <h2 className="text-xl dark:text-neutral-100 font-bold">Videos</h2>
         </Link>
       </nav>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
         {displayedVideos.map((video, index) => (
           <div
             key={video.id || `video-${index}`}
-            className="p-4 rounded-lg shadow-md bg-white dark:bg-neutral-900"
+            className="p-4 rounded-lg shadow-md bg-white dark:bg-neutral-900 hover:scale-[1.02] transition-transform"
           >
             <iframe
               width="100%"

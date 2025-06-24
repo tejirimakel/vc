@@ -12,7 +12,7 @@ export default function PdfPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const pdfsPerPage = 6; // Number of PDFs per page
+  const pdfsPerPage = 6;
   const router = useRouter();
 
   useEffect(() => {
@@ -43,7 +43,10 @@ export default function PdfPage() {
     <div className="pt-12 pb-20 px-3">
       {/* Top Navigation Bar */}
       <nav className="flex items-center justify-between fixed top-0 left-0 w-full z-50 bg-gray-50/90 dark:bg-neutral-950/50 px-6 py-4">
-        <button onClick={() => router.back()} className="text-gray-800 dark:text-neutral-100">
+        <button
+          onClick={() => router.back()}
+          className="text-gray-800 dark:text-neutral-100"
+        >
           <IoMdArrowRoundBack className="w-6 h-6" />
         </button>
         <Link href="/ecopy">
@@ -59,9 +62,21 @@ export default function PdfPage() {
       ) : pdfs.length > 0 ? (
         <>
           {/* PDF Viewer Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             {displayedPdfs.map((pdf) => (
-              <PdfViewerComponent className="rounded-lg" key={pdf.id} pdfUrl={pdf.url} />
+              <Link
+                key={pdf.id}
+                href={{
+                  pathname: `/ecopy/${pdf.id}`,
+                  query: { url: pdf.url, title: pdf.title },
+                }}
+                className="hover:scale-[1.02] transition-transform"
+              >
+                <PdfViewerComponent
+                  
+                  pdfUrl={pdf.url}
+                />
+              </Link>
             ))}
           </div>
 
@@ -72,7 +87,9 @@ export default function PdfPage() {
                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
                 className={`px-4 py-2 rounded-lg font-semibold flex items-center ${
-                  currentPage === 1 ? "text-gray-500 cursor-not-allowed" : "hover:text-red-700"
+                  currentPage === 1
+                    ? "text-gray-500 cursor-not-allowed"
+                    : "hover:text-red-700"
                 }`}
               >
                 <FaArrowLeft className="mr-2" /> Previous
@@ -81,10 +98,14 @@ export default function PdfPage() {
                 Page {currentPage} of {totalPages}
               </span>
               <button
-                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
                 disabled={currentPage === totalPages}
                 className={`px-4 py-2 rounded-lg font-semibold flex items-center ${
-                  currentPage === totalPages ? "text-gray-500 cursor-not-allowed" : "hover:text-red-700"
+                  currentPage === totalPages
+                    ? "text-gray-500 cursor-not-allowed"
+                    : "hover:text-red-700"
                 }`}
               >
                 Next <FaArrowRight className="ml-2" />
