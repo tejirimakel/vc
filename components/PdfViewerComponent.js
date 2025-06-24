@@ -52,7 +52,7 @@ export default function PdfViewerComponent({ pdfUrl }) {
           setError('PDF failed to load');
         }}
       >
-        <Page pageNumber={1} width={410} />
+        <Page pageNumber={1} width={350} />
       </Document>
     </div>
   );
