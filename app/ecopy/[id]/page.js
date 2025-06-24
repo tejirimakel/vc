@@ -72,7 +72,7 @@ export default function EcopyDetailPage() {
   // Handle dynamic resizing
   useEffect(() => {
     const updateWidth = () => {
-      setContainerWidth(Math.min(410, window.innerWidth - 40));
+      setContainerWidth(Math.min(300, window.innerWidth - 40));
     };
     updateWidth();
 
