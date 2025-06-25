@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/TextLayer.css';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
@@ -10,6 +10,20 @@ pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.js';
 export default function PdfViewerComponent({ pdfUrl }) {
   const [blobUrl, setBlobUrl] = useState(null);
   const [error, setError] = useState(null);
+  const [containerWidth, setContainerWidth] = useState(335);
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    const updateWidth = () => {
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.offsetWidth);
+      }
+    };
+
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
+  }, []);
 
   useEffect(() => {
     if (!pdfUrl) return;
@@ -52,7 +66,7 @@ export default function PdfViewerComponent({ pdfUrl }) {
           setError('PDF failed to load');
         }}
       >
-        <Page pageNumber={1} width={330} />
+        <Page pageNumber={1} width={containerWidth} />
       </Document>
     </div>
   );

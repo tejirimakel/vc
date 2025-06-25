@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import Navbar from "@/components/nav";
 import { useSearchParams } from "next/navigation";
@@ -21,7 +21,8 @@ export default function EcopyDetailPage() {
   const [blobUrl, setBlobUrl] = useState(null);
   const [numPages, setNumPages] = useState(null);
   const [error, setError] = useState(null);
-  const [containerWidth, setContainerWidth] = useState(330);
+  const [containerWidth, setContainerWidth] = useState(335);
+  const containerRef = useRef(null);
 
   const router = useRouter();
   const blobRef = useRef(null); // holds URL for cleanup
@@ -69,15 +70,16 @@ export default function EcopyDetailPage() {
     };
   }, [url]);
 
-  // Handle dynamic resizing
   useEffect(() => {
     const updateWidth = () => {
-      setContainerWidth(Math.min(400, window.innerWidth - 20));
+      if (containerRef.current) {
+        setContainerWidth(containerRef.current.offsetWidth);
+      }
     };
-    updateWidth();
 
-    window.addEventListener("resize", updateWidth);
-    return () => window.removeEventListener("resize", updateWidth);
+    updateWidth();
+    window.addEventListener('resize', updateWidth);
+    return () => window.removeEventListener('resize', updateWidth);
   }, []);
 
   if (!hasMounted) return null;
