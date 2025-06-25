@@ -2,6 +2,7 @@ import React from "react";
 import "./globals.css";
 import { Poppins } from "next/font/google";
 // import { Analytics } from "@vercel/analytics/next";
+// import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700", "800", "900"],
@@ -12,9 +13,11 @@ const poppins = Poppins({
 });
 
 export const viewport = {
-  width: "device-width",
-  initialScale: 1.0,
-  themeColor: "#000000",
+  width: 'device-width',
+  initialScale: 1,
+  minimumScale: 1,
+  maximumScale: 1,
+  userScalable: false,
 };
 
 export const metadata = {
@@ -63,14 +66,11 @@ export default function RootLayout({ children }) {
         <meta name="twitter:title" content={metadata.twitter.title} />
         <meta name="twitter:description" content={metadata.twitter.description} />
         <meta name="twitter:image" content={metadata.twitter.image} />
-        <link rel="apple-touch-icon" href="/web-app-manifest-192x192.png" />
-        <link rel="icon" href="/favicon.ico" />
-        <link rel="icon" href="/apple-icon.png" />
-        <link rel="android-chrome" href="/web-app-manifest-512x512.png" />
       </head>
       <body className="bg-gray-50 dark:bg-neutral-950">
         {/* <Analytics /> */}
         {children}
+        {/* <SpeedInsights /> */}
       </body>
     </html>
   );
