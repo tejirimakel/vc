@@ -21,7 +21,7 @@ export default function EcopyDetailPage() {
   const [blobUrl, setBlobUrl] = useState(null);
   const [numPages, setNumPages] = useState(null);
   const [error, setError] = useState(null);
-  const [containerWidth, setContainerWidth] = useState(340);
+  const [containerWidth, setContainerWidth] = useState(345);
   const containerRef = useRef(null);
 
   const router = useRouter();
