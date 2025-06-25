@@ -21,7 +21,7 @@ export default function EcopyDetailPage() {
   const [blobUrl, setBlobUrl] = useState(null);
   const [numPages, setNumPages] = useState(null);
   const [error, setError] = useState(null);
-  const [containerWidth, setContainerWidth] = useState(350);
+  const [containerWidth, setContainerWidth] = useState(330);
 
   const router = useRouter();
   const blobRef = useRef(null); // holds URL for cleanup
@@ -72,7 +72,7 @@ export default function EcopyDetailPage() {
   // Handle dynamic resizing
   useEffect(() => {
     const updateWidth = () => {
-      setContainerWidth(Math.min(410, window.innerWidth - 40));
+      setContainerWidth(Math.min(400, window.innerWidth - 20));
     };
     updateWidth();
 
