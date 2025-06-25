@@ -43,7 +43,7 @@ export default function PdfViewerComponent({ pdfUrl }) {
   if (!blobUrl) return <div>Loading preview...</div>;
 
   return (
-    <div className="w-full h-auto overflow-hidden bg-white p-2 rounded shadow-sm">
+    <div className="w-full h-auto overflow-hidden bg-white p-2 rounded-lg shadow-sm">
       <Document
         key={blobUrl}
         file={blobUrl}
@@ -52,7 +52,7 @@ export default function PdfViewerComponent({ pdfUrl }) {
           setError('PDF failed to load');
         }}
       >
-        <Page pageNumber={1} width={300} />
+        <Page pageNumber={1} width={350} />
       </Document>
     </div>
   );

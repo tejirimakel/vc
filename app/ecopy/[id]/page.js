@@ -21,7 +21,7 @@ export default function EcopyDetailPage() {
   const [blobUrl, setBlobUrl] = useState(null);
   const [numPages, setNumPages] = useState(null);
   const [error, setError] = useState(null);
-  const [containerWidth, setContainerWidth] = useState(410);
+  const [containerWidth, setContainerWidth] = useState(350);
 
   const router = useRouter();
   const blobRef = useRef(null); // holds URL for cleanup
@@ -72,7 +72,7 @@ export default function EcopyDetailPage() {
   // Handle dynamic resizing
   useEffect(() => {
     const updateWidth = () => {
-      setContainerWidth(Math.min(300, window.innerWidth - 40));
+      setContainerWidth(Math.min(410, window.innerWidth - 40));
     };
     updateWidth();
 
@@ -99,7 +99,7 @@ export default function EcopyDetailPage() {
         </Link>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-4">
+      <div className="max-w-4xl mx-auto">
         <h1 className="text-2xl font-semibold mb-6 dark:text-neutral-100">
           {title}
         </h1>
