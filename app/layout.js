@@ -31,9 +31,6 @@ export const metadata = {
   manifest: "/manifest.json",
   keywords: "live news, streaming, Thevaluechain, breaking news, latest news updates",
   author: "Thevaluechain Team",
-  charSet: "utf-8",
-  mobileWebAppCapable: "yes",
-  appleMobileWebAppTitle: "Valuechain",
   robots: "index, follow",
   og: {
     title: "Thevaluechain Live News & Streaming",
