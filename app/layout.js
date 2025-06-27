@@ -20,6 +20,11 @@ export const viewport = {
   userScalable: false,
 };
 
+export const bodyColor = {
+  light: "bg-gray-50",
+  dark: "bg-neutral-950",
+};
+
 export const metadata = {
   title: "Thevaluechain",
   description: "Thevaluechain live news & streaming app",
@@ -29,7 +34,6 @@ export const metadata = {
   charSet: "utf-8",
   mobileWebAppCapable: "yes",
   appleMobileWebAppTitle: "Valuechain",
-  viewport: viewport,
   robots: "index, follow",
   og: {
     title: "Thevaluechain Live News & Streaming",
@@ -49,8 +53,8 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className={poppins.className}>
-      <body className="bg-gray-50 dark:bg-neutral-950">
+    <html lang="en" className={`${poppins.className} antialiased`}>
+      <body className={`${bodyColor.light} dark:${bodyColor.dark} antialiased`}>
         {/* <Analytics /> */}
         {children}
         {/* <SpeedInsights /> */}
