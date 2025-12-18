@@ -77,6 +77,17 @@ export default function MobileHome() {
   return (
 <ProtectedRoutes>
     <div className="h-auto bg-inherit">
+      {isLoading && (
+        <div className="flex flex-col items-center justify-center h-screen bg-white dark:bg-neutral-900">
+          <Image
+            src="/VC-2023.jpg"
+            alt="Valuechain Oil & Gas"
+            width={200}
+            height={200}
+            className="animate-pulse"
+          />
+        </div>
+      )}
       {!isLoading && (
         <>
           <nav className="fixed top-0 left-0 w-full z-50 bg-neutral-50/50 dark:bg-neutral-950/50 px-2 backdrop-blur-md shadow-sm">
