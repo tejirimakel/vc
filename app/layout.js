@@ -2,15 +2,13 @@ import React from "react";
 import "./globals.css";
 import { Poppins } from "next/font/google";
 import { AppReadyProvider } from "@/components/appReady";
-// import { Analytics } from "@vercel/analytics/next";
-// import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const poppins = Poppins({
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
+  weight: ["300","400","500","600","700","800","900"],
   style: "normal",
   subsets: ["latin"],
   display: "swap",
-  adjustFontFallback: false, // Prevents hydration mismatch
+  adjustFontFallback: false,
 });
 
 export const viewport = {
@@ -19,11 +17,6 @@ export const viewport = {
   minimumScale: 1,
   maximumScale: 1,
   userScalable: false,
-};
-
-export const bodyColor = {
-  light: "bg-gray-50",
-  dark: "bg-neutral-950",
 };
 
 export const metadata = {
@@ -39,9 +32,7 @@ export const metadata = {
   ],
   authors: [{ name: "Thevaluechain Team" }],
   robots: "index, follow",
-
   metadataBase: new URL("https://thevaluechainng.com"),
-
   openGraph: {
     title: "Thevaluechain Live News & Streaming",
     description:
@@ -50,7 +41,7 @@ export const metadata = {
     siteName: "TheValueChain",
     images: [
       {
-        url: "/VC-2023.jpg", 
+        url: "/VC-2023.jpg",
         width: 1200,
         height: 630,
         alt: "TheValueChain",
@@ -58,7 +49,6 @@ export const metadata = {
     ],
     type: "website",
   },
-
   twitter: {
     card: "summary_large_image",
     title: "Thevaluechain Live News & Streaming",
@@ -68,15 +58,16 @@ export const metadata = {
   },
 };
 
-
-
 export default function RootLayout({ children }) {
+  const bodyColor = {
+    light: "bg-gray-50",
+    dark: "bg-neutral-950",
+  };
+
   return (
     <html lang="en" className={`${poppins.className} antialiased`}>
       <body className={`${bodyColor.light} dark:${bodyColor.dark} antialiased`}>
-        {/* <Analytics /> */}
         <AppReadyProvider>{children}</AppReadyProvider>
-        {/* <SpeedInsights /> */}
       </body>
     </html>
   );
