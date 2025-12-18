@@ -53,12 +53,6 @@
 html{
   scroll-behavior: smooth;
 }
-html.no-scroll,
-body.no-scroll {
-  overflow: hidden;
-  position: fixed;
-  width: 100%;
-}
 
 
 body {
