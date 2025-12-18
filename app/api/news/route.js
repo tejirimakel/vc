@@ -35,7 +35,7 @@ export async function GET() {
 
     return new Response(
       JSON.stringify({
-        newsFeed: sorted.slice(0, 10),
+        newsFeed: sorted.slice(0, 20),
         trendingNews: trending.length ? trending : sorted.slice(0, 5),
         categories,
         lastUpdated: new Date().toISOString(),

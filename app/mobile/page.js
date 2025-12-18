@@ -4,13 +4,15 @@ import Navbar from "@/components/nav";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { MdOutlineFeed } from "react-icons/md";
+import { IoMdSearch } from "react-icons/io";
+import { useRouter } from "next/navigation";
+import SearchOverlay from "@/components/searchOverlay";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import "swiper/css";
-import { MdOutlineFeed } from "react-icons/md";
-import { IoMdNotifications } from "react-icons/io";
-import { useRouter } from "next/navigation";
 import ProtectedRoutes from "@/components/protectedRoutes";
+
 
 export default function MobileHome() {
   const [isLoading, setIsLoading] = useState(false);
@@ -18,13 +20,10 @@ export default function MobileHome() {
   const [categories, setCategories] = useState(["All"]);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [trendingNews, setTrendingNews] = useState([]);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
 
-  const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const options = { year: "numeric", month: "long", day: "numeric" };
-    return new Intl.DateTimeFormat("en-US", options).format(date);
-  };
 
   useEffect(() => {
     async function fetchData() {
@@ -60,33 +59,27 @@ export default function MobileHome() {
     );
   };
 
-  const filteredNews =
-    selectedCategory === "All"
-      ? newsFeed.slice(0, 10)
-      : newsFeed
-          .filter((post) => post.categories.includes(selectedCategory))
-          .slice(0, 10);
+  const filteredNews = newsFeed
+    .filter((post) => {
+      const categoryMatch =
+        selectedCategory === "All" ||
+        post.categories.includes(selectedCategory);
+
+      const searchMatch =
+        searchQuery === "" ||
+        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
+
+      return categoryMatch && searchMatch;
+    })
+    .slice(0, 12);
 
   return (
 <ProtectedRoutes>
     <div className="h-auto bg-inherit">
-      {/* Show Splash Screen Only on First Visit */}
-      {isLoading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-white dark:bg-black z-50 animate-fade-out">
-          <Image
-            src="/VC-2023.jpg"
-            alt="Valuechain Logo"
-            width={150}
-            height={150}
-            className="w-40 h-auto animate-pulse"
-          />
-        </div>
-      )}
-
-      {/* Show Main Content Only After Splash Screen */}
       {!isLoading && (
         <>
-          <nav className="fixed top-0 left-0 w-full z-50 bg-gray-50/50 dark:bg-neutral-950/50 px-2">
+          <nav className="fixed top-0 left-0 w-full z-50 bg-neutral-50/50 dark:bg-neutral-950/50 px-2 backdrop-blur-md shadow-sm">
             <div className="flex justify-between items-center p-4">
               <div>
                 <Image
@@ -99,7 +92,12 @@ export default function MobileHome() {
                 />
               </div>
               <div className="flex items-center">
-                <IoMdNotifications className="w-5 h-5 text-neutral-800 dark:text-gray-200" />
+              <button
+                    onClick={() => setSearchOpen(true)}
+                    className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-800"
+                  >
+                    <IoMdSearch className="w-5 h-5 text-neutral-800 dark:text-neutral-200" />
+                  </button>
               </div>
             </div>
           </nav>
@@ -150,7 +148,7 @@ export default function MobileHome() {
                           shallow: true,
                         });
                       }}
-                      className={`flex items-center mx-1 text-sm px-8 py-2 rounded-full border border-gray-300 dark:border-neutral-500 ${
+                      className={`flex items-center justify-between text-sm px-8 py-2 rounded-full border border-gray-300 dark:border-neutral-500 ${
                         selectedCategory === category
                           ? "bg-red-700 border-none text-white dark:text-neutral-200"
                           : "bg-gray-100 dark:bg-neutral-400 hover:bg-gray-200 dark:hover:bg-neutral-600 dark:hover:text-neutral-400"
@@ -204,6 +202,12 @@ export default function MobileHome() {
         </>
       )}
       <Navbar />
+      <SearchOverlay
+        open={searchOpen}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        onClose={() => setSearchOpen(false)}
+      />
     </div>
 </ProtectedRoutes>
   );

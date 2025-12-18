@@ -44,7 +44,7 @@ export default function ProtectedRoute({ children }) {
 
   if (status === 'blocked') {
     return (
-      <main className="flex flex-col justify-center items-center h-screen text-center bg-neutral-900">
+      <main className="flex flex-col justify-center items-center h-screen text-center bg-neutral-950">
         <Image
           src="/VC-2023.jpg"
           alt="Access Restricted"
