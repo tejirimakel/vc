@@ -54,5 +54,5 @@ body {
 
 .no-scrollbar {
   -ms-overflow-style: none !important; 
-  scrollbar-width: none !important; /
+  scrollbar-width: none !important; 
 }
