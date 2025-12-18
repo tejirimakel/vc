@@ -1,4 +1,5 @@
 'use client';
+
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -8,25 +9,42 @@ export default function ProtectedRoute({ children }) {
   const [status, setStatus] = useState('checking'); // 'checking', 'allowed', 'blocked'
 
   useEffect(() => {
-    const isApp = localStorage.getItem('app_access');
+    let isAllowed = false;
 
-    if (isApp) {
+    try {
+      // Check for app_access flag in localStorage
+      const appAccess =
+        typeof window !== 'undefined' ? localStorage.getItem('app_access') : null;
+
+      // Detect standalone PWA mode
+      const isStandalone =
+        window.matchMedia('(display-mode: standalone)').matches || // modern browsers
+        (navigator.standalone === true) || // iOS Safari
+        window.location.search.includes('standalone=true'); // optional query param fallback
+
+      if (appAccess || isStandalone) {
+        isAllowed = true;
+      }
+    } catch (err) {
+      console.warn('Access check failed:', err);
+    }
+
+    if (isAllowed) {
       setStatus('allowed');
     } else {
       setStatus('blocked');
-      // Optional: redirect after showing message
-      setTimeout(() => router.replace('/'), 3000);
+      // Redirect to landing page after short delay
+      setTimeout(() => router.replace('/'), 2000);
     }
   }, [router]);
 
   if (status === 'checking') {
-    // While verifying access, show nothing
-    return null;
+    return null; // or a loading spinner
   }
 
   if (status === 'blocked') {
     return (
-      <main className="flex flex-col justify-center items-center h-screen text-center p-6 bg-gray-50 dark:bg-neutral-900">
+      <main className="flex flex-col justify-center items-center h-screen text-center bg-neutral-900">
         <Image
           src="/VC-2023.jpg"
           alt="Access Restricted"
@@ -38,7 +56,7 @@ export default function ProtectedRoute({ children }) {
           Access Restricted
         </h1>
         <p className="text-gray-500 dark:text-neutral-500 text-sm">
-          Redirecting to the landing page...
+          Redirecting to landing page...
         </p>
       </main>
     );
