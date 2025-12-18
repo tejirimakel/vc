@@ -46,13 +46,13 @@ body {
   padding: 20px;
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
+
 .no-scrollbar::-webkit-scrollbar {
   display: none !important;
 }
 
-/* Hide scrollbar for IE, Edge and Firefox */
+
 .no-scrollbar {
-  -ms-overflow-style: none !important;  /* IE and Edge */
-  scrollbar-width: none !important;  /* Firefox */
+  -ms-overflow-style: none !important; 
+  scrollbar-width: none !important; /
 }
