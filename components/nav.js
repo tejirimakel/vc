@@ -26,7 +26,7 @@ export default function Navbar() {
               key={index}
               onClick={() => router.push(item.link)}
               className={`flex flex-col items-center ${
-                isActive ? "text-red-700 dark:text-red-700" : "text-gray-900 dark:text-neutral-400"
+                isActive ? "text-red-700 dark:text-red-700" : "text-neutral-900 dark:text-neutral-400"
               }`}
             >
               <item.icon className="w-6 h-6" aria-hidden="true" />

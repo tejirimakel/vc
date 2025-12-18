@@ -79,7 +79,7 @@ export default function NewsArticle() {
   return (
     <ProtectedRoute>
     <div className="container mx-auto py-6">
-      <nav className="fixed top-0 left-0 w-full z-50 bg-gray-50/50 dark:bg-neutral-950/50 px-2 py-2">
+      <nav className="fixed top-0 left-0 w-full z-50 bg-gray-50/50 dark:bg-neutral-950/50 px-2 py-2 backdrop-blur-md shadow-sm">
       <NavButtons onBack={handleBack} onShare={handleShare} />
       </nav>
 

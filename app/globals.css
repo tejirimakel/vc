@@ -36,6 +36,20 @@
   animation: fadeOut 2.5s ease-in-out forwards;
 }
 
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+.animate-slideDown {
+  animation: slideDown 0.25s ease-out;
+}
+
+
 html{
   scroll-behavior: smooth;
 }

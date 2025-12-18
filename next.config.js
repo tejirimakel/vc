@@ -6,6 +6,7 @@ const nextConfig = {
       { protocol: "https", hostname: "thevaluechainng.com" },
       { protocol: "https", hostname: "www.thevaluechainng.com" },
     ],
+    qualities: [75, 85, 95, 100],
   },
   webpack(config) {
     config.module.rules.push({

@@ -70,7 +70,7 @@ export default function Videos() {
   return (
     <ProtectedRoute>
     <div className="px-2 pt-14 pb-20">
-      <nav className="flex items-center justify-between fixed top-0 left-0 w-full z-50 bg-gray-50/50 dark:bg-neutral-950/50 px-6 py-4">
+      <nav className="flex items-center justify-between fixed top-0 left-0 w-full z-50 bg-gray-50/50 dark:bg-neutral-950/50 px-6 py-4 backdrop-blur-md shadow-sm">
         <button
           onClick={handleBack}
           className="text-gray-800 dark:text-neutral-100"
@@ -109,8 +109,8 @@ export default function Videos() {
             aria-disabled={currentPage === 1}
             className={`flex items-center font-semibold px-4 py-2 rounded-lg ${
               currentPage === 1
-                ? "text-gray-500 dark:text-neutral-800 cursor-not-allowed"
-                : "dark:text-neutral-200 hover:text-red-700"
+                ? "text-neutral-700 dark:text-neutral-800 cursor-not-allowed"
+                : "dark:text-neutral-500 hover:text-red-700"
             }`}
             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
           >
@@ -127,8 +127,8 @@ export default function Videos() {
             aria-disabled={currentPage === totalPages}
             className={`flex items-center font-semibold  px-4 py-2 rounded-lg ${
               currentPage === totalPages
-                ? "text-gray-500 dark:text-neutral-800 cursor-not-allowed"
-                : "dark:text-neutral-200 hover:text-red-700"
+                ? "text-neutral-700 dark:text-neutral-800 cursor-not-allowed"
+                : "dark:text-neutral-500 hover:text-red-700"
             }`}
           >
             Next <FaArrowRight className="ml-2" />

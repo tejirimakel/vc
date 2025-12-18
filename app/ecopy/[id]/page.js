@@ -36,7 +36,7 @@ export default function EcopyDetailPage() {
 
   return (
     <div className="pt-12 pb-20 px-3" ref={containerRef}>
-      <nav className="flex items-center justify-between fixed top-0 left-0 w-full z-50 bg-gray-50/90 dark:bg-neutral-950/50 px-6 py-4">
+      <nav className="flex items-center justify-between fixed top-0 left-0 w-full z-50 bg-gray-50/60 dark:bg-neutral-950/50 px-6 py-4 backdrop-blur-md shadow-sm">
         <button
           onClick={handleBack}
           className="text-gray-800 dark:text-neutral-100"

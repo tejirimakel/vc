@@ -44,7 +44,7 @@ export default function PdfPage() {
     <ProtectedRoutes>
     <div className="pt-12 pb-20 px-3">
       {/* Top Navigation Bar */}
-      <nav className="flex items-center justify-between fixed top-0 left-0 w-full z-50 bg-gray-50/90 dark:bg-neutral-950/50 px-6 py-4">
+      <nav className="flex items-center justify-between fixed top-0 left-0 w-full z-50 bg-gray-50/60 dark:bg-neutral-950/50 px-6 py-4 backdrop-blur-md shadow-sm">
         <button
           onClick={() => router.back()}
           className="text-gray-800 dark:text-neutral-100"
@@ -90,8 +90,8 @@ export default function PdfPage() {
                 disabled={currentPage === 1}
                 className={`px-4 py-2 rounded-lg font-semibold flex items-center ${
                   currentPage === 1
-                    ? "text-gray-500 cursor-not-allowed"
-                    : "hover:text-red-700"
+                    ? "text-neutral-700 dark:text-neutral-800 cursor-not-allowed"
+                    : "text-neutral-900 dark:text-neutral-500 hover:text-red-700"
                 }`}
               >
                 <FaArrowLeft className="mr-2" /> Previous
@@ -106,8 +106,8 @@ export default function PdfPage() {
                 disabled={currentPage === totalPages}
                 className={`px-4 py-2 rounded-lg font-semibold flex items-center ${
                   currentPage === totalPages
-                    ? "text-gray-500 cursor-not-allowed"
-                    : "hover:text-red-700"
+                    ? "text-neutral-700 dark:text-neutral-800 cursor-not-allowed"
+                    : "text-neutral-900 dark:text-neutral-500 hover:text-red-700"
                 }`}
               >
                 Next <FaArrowRight className="ml-2" />
