@@ -1,4 +1,4 @@
-export async function revalidatePWA(urls: string[]) {
+export async function revalidatePWA(urls) {
   const baseUrl = process.env.NEXT_PUBLIC_HOST || "http://localhost:3000";
   const res = await fetch(`${baseUrl}/api/pwa/revalidate`, {
     method: "POST",
