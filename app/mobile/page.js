@@ -201,13 +201,13 @@ export default function MobileHome() {
           </div>
         </>
       )}
-      <Navbar />
-      <SearchOverlay
+         <SearchOverlay
         open={searchOpen}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         onClose={() => setSearchOpen(false)}
       />
+      <Navbar />
     </div>
 </ProtectedRoutes>
   );
