@@ -1,94 +1,41 @@
-'use client';
-
-import Navbar from "@/components/nav";
-import { useSearchParams } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
-import { IoMdArrowRoundBack } from "react-icons/io";
+"use client";
+import { useEffect, useState, useRef } from "react";
 import { Document, Page, pdfjs } from "react-pdf";
-import "react-pdf/dist/Page/TextLayer.css";
-import "react-pdf/dist/Page/AnnotationLayer.css";
+import { useSearchParams, useRouter } from "next/navigation";
+import { IoMdArrowRoundBack } from "react-icons/io";
+import Navbar from "@/components/nav";
 import Link from "next/link";
 
 pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.js";
 
 export default function EcopyDetailPage() {
-  const [hasMounted, setHasMounted] = useState(false);
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const containerRef = useRef(null);
+
   const url = searchParams.get("url");
   const title = searchParams.get("title") || "PDF Document";
 
-  const [blobUrl, setBlobUrl] = useState(null);
   const [numPages, setNumPages] = useState(null);
-  const [error, setError] = useState(null);
   const [containerWidth, setContainerWidth] = useState(345);
-  const containerRef = useRef(null);
-
-  const router = useRouter();
-  const blobRef = useRef(null); // holds URL for cleanup
-
-  const handleBack = () => router.back();
-
-
-  useEffect(() => {
-    setHasMounted(true);
-  }, []);
-
-
-  // Fetch and convert the PDF to blob URL
-  useEffect(() => {
-    if (!url) {
-      setError("Missing PDF URL");
-      return;
-    }
-
-    let active = true;
-
-    const fetchPDF = async () => {
-      try {
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("Failed to fetch PDF");
-        const blob = await res.blob();
-        const blobURL = URL.createObjectURL(blob);
-        if (active) {
-          blobRef.current = blobURL;
-          setBlobUrl(blobURL);
-        }
-      } catch (err) {
-        console.error(err);
-        setError("Failed to load PDF.");
-      }
-    };
-
-    fetchPDF();
-
-    return () => {
-      active = false;
-      if (blobRef.current) {
-        URL.revokeObjectURL(blobRef.current);
-      }
-    };
-  }, [url]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const updateWidth = () => {
-      if (containerRef.current) {
+      if (containerRef.current)
         setContainerWidth(containerRef.current.offsetWidth);
-      }
     };
-
     updateWidth();
-    window.addEventListener('resize', updateWidth);
-    return () => window.removeEventListener('resize', updateWidth);
+    window.addEventListener("resize", updateWidth);
+    return () => window.removeEventListener("resize", updateWidth);
   }, []);
 
-  if (!hasMounted) return null;
-  if (error) return <div className="text-red-600 p-4">❌ {error}</div>;
-  if (!blobUrl) return <div className="p-4">Loading PDF...</div>;
+  const handleBack = () => router.back();
+
+  if (!url) return <div className="p-4 text-red-600">Missing PDF URL</div>;
 
   return (
-    <div className="pt-12 pb-20 px-3">
-      {/* Top Navigation Bar */}
+    <div className="pt-12 pb-20 px-3" ref={containerRef}>
       <nav className="flex items-center justify-between fixed top-0 left-0 w-full z-50 bg-gray-50/90 dark:bg-neutral-950/50 px-6 py-4">
         <button
           onClick={handleBack}
@@ -101,13 +48,13 @@ export default function EcopyDetailPage() {
         </Link>
       </nav>
 
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto mt-8">
         <h1 className="text-2xl font-semibold mb-6 dark:text-neutral-100">
           {title}
         </h1>
 
         <Document
-          file={blobUrl}
+          file={`/api/pdf?url=${encodeURIComponent(url)}`}
           onLoadSuccess={({ numPages }) => setNumPages(numPages)}
           onLoadError={(err) => {
             console.error("PDF load error:", err);
@@ -131,6 +78,8 @@ export default function EcopyDetailPage() {
             Total Pages: {numPages}
           </p>
         )}
+
+        {error && <p className="text-red-600 mt-2">{error}</p>}
       </div>
 
       <Navbar />

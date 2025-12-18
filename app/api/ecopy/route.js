@@ -1,26 +1,73 @@
+import { NextResponse } from "next/server";
+
+export const runtime = "edge"; 
+
 export async function GET() {
+  const API_URL = process.env.ECOPY_API_URL;
+
+  if (!API_URL) {
+    return NextResponse.json(
+      { error: "ECOPY API URL not configured" },
+      { status: 500 }
+    );
+  }
+
   try {
-    const res = await fetch(process.env.ECOPY_API_URL, {
-      next: { revalidate: 60 * 60 * 24 * 365 }, // Cache for 1 year
+    const res = await fetch(API_URL, {
+      headers: {
+        Accept: "application/json",
+      },
+      next: {
+        revalidate: 60 * 60 * 24 * 365,
+        tags: ["ecopy-pdfs"],
+      },
     });
 
-    if (!res.ok) throw new Error("Failed to fetch PDFs");
+    if (!res.ok) {
+      return NextResponse.json(
+        { error: "Failed to fetch PDFs from source" },
+        { status: res.status }
+      );
+    }
 
-    const pdfs = await res.json();
+    const data = await res.json();
 
-    // Filter PDFs that contain "Value Chain" in their title (case insensitive) and have a date starting with "2025"
-    const filteredPdfs = pdfs
-      .filter((pdf) => /value\s?chain/i.test(pdf.title) && pdf.date?.startsWith("2025") && pdf.url)
-      .sort((a, b) => new Date(b.date) - new Date(a.date)); // Sort by date (latest first)
+    if (!Array.isArray(data)) {
+      return NextResponse.json(
+        { error: "Invalid PDF data format" },
+        { status: 500 }
+      );
+    }
 
-    return new Response(JSON.stringify({ pdfs: filteredPdfs }), {
-      headers: { "Content-Type": "application/json" },
-    });
+    const filteredPdfs = data
+      .filter(
+        (pdf) =>
+          typeof pdf?.title === "string" &&
+          /value\s?chain/i.test(pdf.title) &&
+          typeof pdf?.date === "string" &&
+          pdf.date.startsWith("2025") &&
+          typeof pdf?.url === "string"
+      )
+      .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    return NextResponse.json(
+      {
+        count: filteredPdfs.length,
+        pdfs: filteredPdfs,
+        cachedAt: new Date().toISOString(),
+      },
+      {
+        headers: {
+          "Cache-Control": "public, max-age=86400",
+        },
+      }
+    );
   } catch (error) {
-    console.error("Error fetching PDFs:", error);
-    return new Response(
-      JSON.stringify({ error: "Failed to fetch PDFs" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+    console.error("ECOPY API error:", error);
+
+    return NextResponse.json(
+      { error: "Unexpected server error" },
+      { status: 500 }
     );
   }
 }

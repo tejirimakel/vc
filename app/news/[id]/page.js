@@ -5,6 +5,7 @@ import NavButtons from '@/components/navButtons';
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { decode } from 'he';
+import ProtectedRoute from '@/components/protectedRoutes';
 
 
 export default function NewsArticle() {
@@ -76,6 +77,7 @@ export default function NewsArticle() {
 
 
   return (
+    <ProtectedRoute>
     <div className="container mx-auto py-6">
       <nav className="fixed top-0 left-0 w-full z-50 bg-gray-50/50 dark:bg-neutral-950/50 px-2 py-2">
       <NavButtons onBack={handleBack} onShare={handleShare} />
@@ -109,5 +111,6 @@ export default function NewsArticle() {
 
       <Navbar />
     </div>
+    </ProtectedRoute>
   );
 }

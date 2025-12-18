@@ -1,6 +1,7 @@
 import React from "react";
 import "./globals.css";
 import { Poppins } from "next/font/google";
+import { AppReadyProvider } from "@/components/appReady";
 // import { Analytics } from "@vercel/analytics/next";
 // import { SpeedInsights } from '@vercel/speed-insights/next';
 
@@ -13,7 +14,7 @@ const poppins = Poppins({
 });
 
 export const viewport = {
-  width: 'device-width',
+  width: "device-width",
   initialScale: 1,
   minimumScale: 1,
   maximumScale: 1,
@@ -29,31 +30,52 @@ export const metadata = {
   title: "Thevaluechain",
   description: "Thevaluechain live news & streaming app",
   manifest: "/manifest.json",
-  keywords: "live news, streaming, Thevaluechain, breaking news, latest news updates",
-  author: "Thevaluechain Team",
+  keywords: [
+    "live news",
+    "streaming",
+    "Thevaluechain",
+    "breaking news",
+    "latest news updates",
+  ],
+  authors: [{ name: "Thevaluechain Team" }],
   robots: "index, follow",
-  og: {
+
+  metadataBase: new URL("https://thevaluechainng.com"),
+
+  openGraph: {
     title: "Thevaluechain Live News & Streaming",
-    description: "Stay updated with TheValueChain live news & streaming service.",
-    type: "website",
+    description:
+      "Stay updated with TheValueChain live news & streaming service.",
     url: "https://thevaluechainng.com",
-    image: "/VC-2023.jpg",
-    site_name: "TheValueChain",
+    siteName: "TheValueChain",
+    images: [
+      {
+        url: "/VC-2023.jpg", 
+        width: 1200,
+        height: 630,
+        alt: "TheValueChain",
+      },
+    ],
+    type: "website",
   },
+
   twitter: {
     card: "summary_large_image",
     title: "Thevaluechain Live News & Streaming",
-    description: "Watch live news and stay informed with Thevaluechain streaming service.",
-    image: "/VC-2023.jpg",
+    description:
+      "Watch live news and stay informed with Thevaluechain streaming service.",
+    images: ["/VC-2023.jpg"],
   },
 };
+
+
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${poppins.className} antialiased`}>
       <body className={`${bodyColor.light} dark:${bodyColor.dark} antialiased`}>
         {/* <Analytics /> */}
-        {children}
+        <AppReadyProvider>{children}</AppReadyProvider>
         {/* <SpeedInsights /> */}
       </body>
     </html>

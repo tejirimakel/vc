@@ -1,19 +1,27 @@
-"use client";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+"use client"
+
+import { useEffect } from "react"
+import { usePathname, useRouter } from "next/navigation"
 
 export default function MobileRedirect() {
-  const router = useRouter();
+  const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
-    const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true
+
+    // Already on correct route → do nothing
+    if (isStandalone && pathname === "/mobile") return
+    if (!isStandalone && pathname === "/") return
 
     if (isStandalone) {
-      router.replace("/mobile"); // Redirect to mobile PWA view
+      router.replace("/mobile")
     } else {
-      router.replace("/"); // Ensure browser users stay on main index page
+      router.replace("/")
     }
-  }, [router]);
+  }, [router, pathname])
 
-  return null; // No UI rendered for this component
+  return null
 }

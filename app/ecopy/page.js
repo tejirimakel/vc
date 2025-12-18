@@ -6,6 +6,7 @@ import { IoMdArrowRoundBack } from "react-icons/io";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import Link from "next/link";
 import PdfViewerComponent from "@/components/PdfViewerComponent";
+import ProtectedRoutes from "@/components/protectedRoutes";
 
 export default function PdfPage() {
   const [pdfs, setPdfs] = useState([]);
@@ -40,6 +41,7 @@ export default function PdfPage() {
   const displayedPdfs = pdfs.slice(startIndex, startIndex + pdfsPerPage);
 
   return (
+    <ProtectedRoutes>
     <div className="pt-12 pb-20 px-3">
       {/* Top Navigation Bar */}
       <nav className="flex items-center justify-between fixed top-0 left-0 w-full z-50 bg-gray-50/90 dark:bg-neutral-950/50 px-6 py-4">
@@ -120,5 +122,6 @@ export default function PdfPage() {
       {/* Bottom Navbar */}
       <Navbar />
     </div>
+</ProtectedRoutes>
   );
 }

@@ -1,39 +1,64 @@
+export const runtime = 'nodejs'
+
 export async function GET() {
   try {
-    // Fetch data from WordPress API
-    const response = await fetch(process.env.WORDPRESS_API_URL, {
-      next: { revalidate: 86400 }, // Cache for 24 hours
-    });
+    const res = await fetch(process.env.WORDPRESS_API_URL, {
+      next: { revalidate: 60 * 60 * 24 }, // 24h ISR
+    })
 
-    if (!response.ok) throw new Error("Failed to fetch data");
+    if (!res.ok) {
+      throw new Error(`WP API error: ${res.status}`)
+    }
 
-    const data = await response.json();
+    const posts = await res.json()
 
-    // Sort news in descending order (latest first)
-    const sortedNews = data.sort((a, b) => new Date(b.date) - new Date(a.date));
+    // Sort newest first
+    const sorted = posts.sort(
+      (a, b) => new Date(b.date) - new Date(a.date)
+    )
 
-    // Prepare categories
-    const categories = [...new Set(sortedNews.flatMap((post) => post.categories || ["Uncategorized"]))];
+    // Derive categories safely
+    const categories = [
+      ...new Set(
+        sorted.flatMap(post =>
+          Array.isArray(post.categories) && post.categories.length
+            ? post.categories
+            : ['Uncategorized']
+        )
+      ),
+    ]
 
-    // Return the processed data
+    // Trending heuristic (recent + sticky / featured)
+    const trending = sorted
+      .filter(post => post.sticky || post.featured_media)
+      .slice(0, 5)
+
     return new Response(
       JSON.stringify({
-        newsFeed: sortedNews.slice(0, 10),  // Limit to 10 latest posts
+        newsFeed: sorted.slice(0, 10),
+        trendingNews: trending.length ? trending : sorted.slice(0, 5),
         categories,
-        trendingNews: sortedNews.slice(0, 5)  // Limit to 5 latest trending posts
+        lastUpdated: new Date().toISOString(),
       }),
       {
         status: 200,
         headers: {
-          'Cache-Control': 'public, max-age=86400', // Ensure cache headers are set correctly
+          'Content-Type': 'application/json',
+          'Cache-Control': 'public, max-age=86400',
         },
       }
-    );
-  } catch (error) {
-    console.error("Error fetching data:", error);
+    )
+  } catch (err) {
+    console.error('News API error:', err)
+
     return new Response(
-      JSON.stringify({ message: "Failed to fetch news" }),
-      { status: 500 }
-    );
+      JSON.stringify({
+        error: 'Failed to fetch news',
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    )
   }
 }

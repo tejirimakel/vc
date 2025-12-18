@@ -2,9 +2,10 @@
 import Navbar from "@/components/nav";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { IoMdArrowRoundBack } from "react-icons/io";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import Link from "next/link";
+import ProtectedRoute from '@/components/protectedRoutes';
+
 
 export default function Videos() {
   const [videos, setVideos] = useState([]);
@@ -61,14 +62,20 @@ export default function Videos() {
     );
   }
 
+  {videos.length === 0 && !loading && (
+    <p className="text-center text-gray-500 mt-10">No videos found.</p>
+  )}
+  
+
   return (
+    <ProtectedRoute>
     <div className="px-2 pt-14 pb-20">
       <nav className="flex items-center justify-between fixed top-0 left-0 w-full z-50 bg-gray-50/50 dark:bg-neutral-950/50 px-6 py-4">
         <button
           onClick={handleBack}
           className="text-gray-800 dark:text-neutral-100"
         >
-          <IoMdArrowRoundBack className="w-6 h-6" />
+          <FaArrowLeft className="w-6 h-6" />
         </button>
         <Link href='/video'>
         <h2 className="text-xl dark:text-neutral-100 font-bold">Videos</h2>
@@ -83,11 +90,12 @@ export default function Videos() {
             <iframe
               width="100%"
               height="180"
-              src={`https://www.youtube.com/embed/${video.id}`}
+              src={`https://www.youtube.com/embed/${video.id}?rel=0`}
               title={video.title}
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
               className="rounded-lg"
+              loading="lazy"
             />
             <p className="mt-2 font-semibold dark:text-neutral-300 text-md">{video.title}</p>
           </div>
@@ -130,5 +138,6 @@ export default function Videos() {
 
       <Navbar />
     </div>
+    </ProtectedRoute>
   );
 }

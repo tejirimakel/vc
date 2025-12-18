@@ -7,9 +7,10 @@ import Link from "next/link";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import "swiper/css";
-//import { MdOutlineFeed } from "react-icons/md";
+import { MdOutlineFeed } from "react-icons/md";
 import { IoMdNotifications } from "react-icons/io";
 import { useRouter } from "next/navigation";
+import ProtectedRoutes from "@/components/protectedRoutes";
 
 export default function MobileHome() {
   const [isLoading, setIsLoading] = useState(false);
@@ -32,7 +33,7 @@ export default function MobileHome() {
       });
       const data = await response.json();
       setNewsFeed(data.newsFeed);
-      setCategories(data.categories);
+      setCategories(["All", ...data.categories.filter(c => c !== "All")]);
       setTrendingNews(data.trendingNews);
     }
 
@@ -67,6 +68,7 @@ export default function MobileHome() {
           .slice(0, 10);
 
   return (
+<ProtectedRoutes>
     <div className="h-auto bg-inherit">
       {/* Show Splash Screen Only on First Visit */}
       {isLoading && (
@@ -154,6 +156,7 @@ export default function MobileHome() {
                           : "bg-gray-100 dark:bg-neutral-400 hover:bg-gray-200 dark:hover:bg-neutral-600 dark:hover:text-neutral-400"
                       }`}
                     >
+                      <MdOutlineFeed className="mr-2 text-md" />
                       {singleWordCategory}
                     </button>
                   );
@@ -202,5 +205,6 @@ export default function MobileHome() {
       )}
       <Navbar />
     </div>
+</ProtectedRoutes>
   );
 }

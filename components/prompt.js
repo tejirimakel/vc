@@ -1,94 +1,106 @@
-"use client";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { IoClose } from "react-icons/io5"; // Import close icon
+"use client"
+
+import { useEffect, useState } from "react"
+import { IoClose } from "react-icons/io5"
 
 export default function InstallPrompt() {
-  const [deferredPrompt, setDeferredPrompt] = useState(null);
-  const [isPromptVisible, setIsPromptVisible] = useState(false);
-  const router = useRouter();
+  const [deferredPrompt, setDeferredPrompt] = useState(null)
+  const [visible, setVisible] = useState(false)
+  const [isStandalone, setIsStandalone] = useState(false)
+  const [isIos, setIsIos] = useState(false)
 
   useEffect(() => {
-    const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+    const standalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true
 
-    // If the app is already installed, redirect to the mobile interface
-    if (isStandalone) {
-      router.replace("/mobile");
-      return;
+    setIsStandalone(standalone)
+
+    if (standalone) return
+
+    if (document.cookie.includes("pwa-install-dismissed=true")) {
+      return
     }
 
-    // iOS detection for custom prompt (iOS does not support beforeinstallprompt)
-    const isIos = /iphone|ipod|ipad/.test(window.navigator.userAgent.toLowerCase());
+    const ios =
+      /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase())
 
-    if (isIos) {
-      // Show custom prompt for iOS users asking them to add to home screen
-      setIsPromptVisible(true);
-    } else {
-      // Handle the beforeinstallprompt event for other browsers
-      const handleBeforeInstallPrompt = (e) => {
-        e.preventDefault();
-        setDeferredPrompt(e);
-        setIsPromptVisible(true);
-      };
+    setIsIos(ios)
 
-      window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-
-      return () => {
-        window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
-      };
+    if (ios) {
+      setVisible(true)
+      return
     }
-  }, [router]);
 
-  const handleInstallClick = () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice
-        .then((choiceResult) => {
-          if (choiceResult.outcome === "accepted") {
-            document.cookie = "pwa-installed=true; path=/; max-age=31536000"; // 1-year expiry
-            setIsPromptVisible(false);
-          }
-          setDeferredPrompt(null);
-        })
-        .catch((err) => {
-          console.error("Installation failed", err);
-        });
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault()
+      setDeferredPrompt(e)
+      setVisible(true)
     }
-  };
+
+    window.addEventListener(
+      "beforeinstallprompt",
+      handleBeforeInstallPrompt
+    )
+
+    return () => {
+      window.removeEventListener(
+        "beforeinstallprompt",
+        handleBeforeInstallPrompt
+      )
+    }
+  }, [])
+
+  const handleInstall = async () => {
+    if (!deferredPrompt) return
+
+    deferredPrompt.prompt()
+    const choiceResult = await deferredPrompt.userChoice
+
+    if (choiceResult.outcome === "accepted") {
+      document.cookie =
+        "pwa-installed=true; path=/; max-age=31536000"
+    }
+
+    setDeferredPrompt(null)
+    setVisible(false)
+  }
 
   const handleClose = () => {
-    setIsPromptVisible(false);
-  };
+    document.cookie =
+      "pwa-install-dismissed=true; path=/; max-age=604800" // 7 days
+    setVisible(false)
+  }
+
+  if (!visible || isStandalone) return null
 
   return (
-    <>
-      {isPromptVisible && (
-        <div className="fixed bottom-0 left-0 w-full rounded-t-2xl bg-gray-950 dark:bg-neutral-900 text-white px-4 py-6 text-center shadow-md">
-          <div className="flex justify-between items-center">
-            <p className="flex-grow">
-              {window.matchMedia("(display-mode: standalone)").matches
-                ? "Install this app for a better experience!"
-                : "Add this app to your home screen for a better experience!"}
-            </p>
+    <div className="fixed bottom-0 left-0 w-full rounded-t-2xl bg-gray-950 text-white px-4 py-6 shadow-lg z-50">
+      <div className="flex justify-between items-center">
+        <p className="text-sm">
+          Install Thevaluechain for a better reading experience
+        </p>
 
-            {/* Close Button */}
-            <button onClick={handleClose} className="text-white hover:text-red-500">
-              <IoClose className="w-6 h-6" />
-            </button>
-          </div>
+        <button onClick={handleClose}>
+          <IoClose className="w-6 h-6" />
+        </button>
+      </div>
 
-          {window.matchMedia("(display-mode: standalone)").matches ? (
-            <button
-              onClick={handleInstallClick}
-              className="bg-red-700 text-white px-4 py-2 rounded mt-4"
-            >
-              Install
-            </button>
-          ) : (
-            <p className="mt-2">Tap the Share icon and then select Add to Home Screen.</p>
-          )}
-        </div>
+      {!isIos && deferredPrompt && (
+        <button
+          onClick={handleInstall}
+          className="mt-4 w-full bg-red-700 py-2 rounded"
+        >
+          Install App
+        </button>
       )}
-    </>
-  );
+
+      {isIos && (
+        <p className="mt-3 text-sm text-gray-300">
+          Tap the Share icon and select{" "}
+          <strong>Add to Home Screen</strong>
+        </p>
+      )}
+    </div>
+  )
 }
