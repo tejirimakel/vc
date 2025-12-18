@@ -7,7 +7,7 @@ import Link from "next/link";
 import { MdOutlineFeed } from "react-icons/md";
 import { IoMdSearch } from "react-icons/io";
 import { useRouter } from "next/navigation";
-import SearchOverlay from "@/components/searchOverlay";
+//import SearchOverlay from "@/components/searchOverlay";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import "swiper/css";
@@ -78,12 +78,12 @@ export default function MobileHome() {
 <ProtectedRoutes>
     <div className="h-auto bg-inherit">
       {isLoading && (
-        <div className="flex flex-col items-center justify-center h-screen bg-white dark:bg-neutral-900">
+        <div className="flex flex-col items-center justify-center h-screen bg-white dark:bg-neutral-950">
           <Image
             src="/VC-2023.jpg"
             alt="Valuechain Oil & Gas"
-            width={200}
-            height={200}
+            width={150}
+            height={150}
             className="animate-pulse"
           />
         </div>
@@ -102,6 +102,7 @@ export default function MobileHome() {
                   quality={100}
                 />
               </div>
+              {/*
               <div className="flex items-center">
               <button
                     onClick={() => setSearchOpen(true)}
@@ -109,7 +110,7 @@ export default function MobileHome() {
                   >
                     <IoMdSearch className="w-5 h-5 text-neutral-800 dark:text-neutral-200" />
                   </button>
-              </div>
+              </div> */}
             </div>
           </nav>
 
@@ -212,12 +213,12 @@ export default function MobileHome() {
           </div>
         </>
       )}
-         <SearchOverlay
+       {/*  <SearchOverlay
         open={searchOpen}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         onClose={() => setSearchOpen(false)}
-      />
+      />*/}
       <Navbar />
     </div>
 </ProtectedRoutes>
