@@ -36,7 +36,7 @@ export default function Home() {
           </p>
 
           <div className="mt-8 flex justify-center ">
-            <OpenAppButton />
+                    <OpenAppButton />
           </div>
 
 

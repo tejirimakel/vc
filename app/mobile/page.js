@@ -72,19 +72,19 @@ export default function MobileHome() {
 
       return categoryMatch && searchMatch;
     })
-    .slice(0, 12);
+    .slice(0, 10);
 
   return (
 <ProtectedRoutes>
     <div className="h-auto bg-inherit">
       {isLoading && (
-        <div className="flex flex-col items-center justify-center h-screen bg-white dark:bg-neutral-950">
+        <div className="flex flex-col items-center justify-center h-screen bg-neutral-50 dark:bg-neutral-950">
           <Image
             src="/VC-2023.jpg"
             alt="Valuechain Oil & Gas"
             width={150}
             height={150}
-            className="animate-pulse"
+            className="animate-pulse motion-reduce:animate-none"
           />
         </div>
       )}
