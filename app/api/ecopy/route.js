@@ -18,7 +18,7 @@ export async function GET() {
         Accept: "application/json",
       },
       next: {
-        revalidate: 60 * 60 * 24 * 365,
+        revalidate: 60 * 60 * 24 * 7,
         tags: ["ecopy-pdfs"],
       },
     });
