@@ -5,8 +5,13 @@ export default function OfflinePage() {
   const router = useRouter();
 
   const handleRetry = () => {
-    router.refresh(); 
+    if (navigator.onLine) {
+      router.refresh();
+    } else {
+      alert('Still offline! Check your connection.');
+    }
   };
+  
 
   return (
     <main className="flex flex-col items-center justify-center h-screen p-6 text-center bg-gray-50 dark:bg-neutral-900">
