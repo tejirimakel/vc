@@ -6,8 +6,35 @@ import {
 } from "workbox-strategies";
 import { ExpirationPlugin } from "workbox-expiration";
 
+const OFFLINE_URL = "/offline";
+
 /* -------------------------------------
-   📰 API Caching (News, Articles)
+   🧭 Pages (Navigation)
+------------------------------------- */
+registerRoute(
+  ({ request }) => request.mode === 'navigate',
+  new NetworkFirst({
+    cacheName: 'pages-cache',
+    networkTimeoutSeconds: 5,
+    plugins: [
+      new ExpirationPlugin({
+        maxEntries: 50,
+        maxAgeSeconds: 60 * 60 * 24, // 1 day
+      }),
+    ],
+  })
+);
+
+setCatchHandler(async ({ event }) => {
+  if (event.request.destination === 'document') {
+    return caches.match(OFFLINE_URL);
+  }
+  return Response.error();
+});
+
+
+/* -------------------------------------
+   📰 WordPress API (News)
 ------------------------------------- */
 registerRoute(
   ({ url }) =>
@@ -26,7 +53,7 @@ registerRoute(
 );
 
 /* -------------------------------------
-   🖼 Images (Cache First)
+   🖼 Images
 ------------------------------------- */
 registerRoute(
   ({ request }) => request.destination === "image",
@@ -35,14 +62,14 @@ registerRoute(
     plugins: [
       new ExpirationPlugin({
         maxEntries: 100,
-        maxAgeSeconds: 60 * 60 * 24, // 1 day
+        maxAgeSeconds: 60 * 60 * 24,
       }),
     ],
   })
 );
 
 /* -------------------------------------
-   📄 PDFs via API Proxy (Cache First)
+   📄 PDFs (Proxy)
 ------------------------------------- */
 registerRoute(
   ({ url }) => url.pathname.startsWith("/api/pdf"),
@@ -51,14 +78,14 @@ registerRoute(
     plugins: [
       new ExpirationPlugin({
         maxEntries: 30,
-        maxAgeSeconds: 60 * 60 * 24 * 7, 
+        maxAgeSeconds: 60 * 60 * 24 * 7,
       }),
     ],
   })
 );
 
 /* -------------------------------------
-   🎥 YouTube & External Media
+   🎥 YouTube / Media
 ------------------------------------- */
 registerRoute(
   ({ url }) =>
@@ -70,121 +97,27 @@ registerRoute(
 );
 
 /* -------------------------------------
-   🎥 YouTube API (Internal)
-------------------------------------- */
-registerRoute(
-  ({ url }) => url.pathname.startsWith("/api/youtube"),
-  new StaleWhileRevalidate({
-    cacheName: "youtube-api",
-    plugins: [
-      new ExpirationPlugin({
-        maxEntries: 10,
-        maxAgeSeconds: 60 * 60 * 24,
-      }),
-    ],
-  })
-);
-
-/* -------------------------------------
-   🧭 Navigation (Pages)
-------------------------------------- */
-registerRoute(
-  ({ request }) => request.mode === "navigate",
-  new NetworkFirst({
-    cacheName: "pages-cache",
-    networkTimeoutSeconds: 5,
-  })
-);
-
-/* -------------------------------------
-   🚑 Global Offline Fallback
+   🚑 Offline fallback (IMPORTANT)
 ------------------------------------- */
 setCatchHandler(async ({ event }) => {
   if (event.request.destination === "document") {
-    return caches.match("/offline");
+    return caches.match(OFFLINE_URL);
   }
-
   return Response.error();
 });
 
-// =====================================================
-// 🔔 PUSH NOTIFICATIONS
-// =====================================================
-
-self.addEventListener("push", (event) => {
-  if (!event.data) return;
-
-  let data = {};
-
-  try {
-    data = event.data.json();
-  } catch {
-    data = { title: "TheValueChain", body: event.data.text() };
-  }
-
-  const title = data.title || "TheValueChain";
-  const options = {
-    body: data.body || "Breaking news update",
-    icon: "/web-app-manifest-192x192.png",
-    badge: "/badge.png",
-    data: {
-      url: data.url || "/",
-    },
-    vibrate: [100, 50, 100],
-    requireInteraction: true, // stays until user interacts
-  };
-
-  event.waitUntil(self.registration.showNotification(title, options));
-});
-
-// --------------------
-// Notification click
-// --------------------
-self.addEventListener("notificationclick", (event) => {
-  event.notification.close();
-
-  const targetUrl = event.notification.data?.url || "/";
-
-  event.waitUntil(
-    clients
-      .matchAll({ type: "window", includeUncontrolled: true })
-      .then((clientList) => {
-        for (const client of clientList) {
-          if (client.url.includes(targetUrl) && "focus" in client) {
-            return client.focus();
-          }
-        }
-        if (clients.openWindow) {
-          return clients.openWindow(targetUrl);
-        }
-      })
-  );
-});
-
-// --------------------
-// Install / Activate
-// --------------------
-self.addEventListener("install", () => {
+/* -------------------------------------
+   📦 Precache Offline Page
+------------------------------------- */
+self.addEventListener("install", (event) => {
   self.skipWaiting();
+  event.waitUntil(
+    caches.open("offline-cache").then((cache) => {
+      return cache.addAll([OFFLINE_URL, '/mobile']);
+    })
+  );
 });
 
 self.addEventListener("activate", (event) => {
   event.waitUntil(self.clients.claim());
 });
-
-/* -------------------------------------
-   📰 Internal API (Next.js)
-------------------------------------- */
-registerRoute(
-  ({ url }) => url.pathname.startsWith("/api/news"),
-  new NetworkFirst({
-    cacheName: "news-api",
-    networkTimeoutSeconds: 6,
-    plugins: [
-      new ExpirationPlugin({
-        maxEntries: 20,
-        maxAgeSeconds: 60 * 60 * 24,
-      }),
-    ],
-  })
-);
