@@ -1,11 +1,9 @@
 @import "tailwindcss";
 
-
 :root {
   --background: #171717;
   --foreground: #f8f8f8;
   --font-sans: 'Poppins', sans-serif;
-
 }
 
 @theme inline {
@@ -20,7 +18,6 @@
     --foreground: #ededed;
   }
 }
-
 
 @keyframes fadeOut {
   0% {
@@ -49,27 +46,23 @@
   animation: slideDown 0.25s ease-out;
 }
 
-
-html{
+html {
   scroll-behavior: smooth;
 }
-
 
 body {
   font-family: var(--font-sans);
   margin: 0;
-  padding: 20px;
+  padding: 0;
 }
-
 
 .no-scrollbar::-webkit-scrollbar {
-  display: none !important;
+  display: none;
 }
 
-
 .no-scrollbar {
-  -ms-overflow-style: none !important;
-  scrollbar-width: none !important;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 .no-scroll {

@@ -1,69 +1,55 @@
-"use client"
+'use client';
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
 
-import { useEffect, useState } from "react"
-import Image from "next/image"
-import { useAppReady } from "@/components/AppReadyProvider"
-
-export default function SplashScreen({ onComplete }) {
-  const appReady = useAppReady()
-  const [visible, setVisible] = useState(true)
-  const [fading, setFading] = useState(false)
+export default function SplashScreen() {
+  const [visible, setVisible] = useState(false);
+  const [fading, setFading] = useState(false);
 
   useEffect(() => {
-    // Only set when app loads normally
+    // Grant access for protected routes on first load
     if (!localStorage.getItem('app_access')) {
       localStorage.setItem('app_access', 'true');
     }
-  }, []);
-  
 
-  useEffect(() => {
+    // Only show once per session and only in standalone (installed) mode
+    if (sessionStorage.getItem('splashShown')) return;
+
     const isStandalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      window.navigator.standalone === true
+      window.matchMedia('(display-mode: standalone)').matches ||
+      window.navigator.standalone === true;
 
-    const isMobile =
-      /iphone|ipad|ipod|android/i.test(navigator.userAgent)
+    if (!isStandalone) return;
 
-    const alreadyShown = sessionStorage.getItem("pwa-splash-shown")
+    setVisible(true);
+    sessionStorage.setItem('splashShown', 'true');
 
-    if (!isStandalone || !isMobile || alreadyShown) {
-      setVisible(false)
-      onComplete && onComplete()
-      return
-    }
+    // Start fade-out after 1.8s, fully hidden after 2.4s
+    const fadeTimer = setTimeout(() => setFading(true), 1800);
+    const hideTimer = setTimeout(() => setVisible(false), 2400);
 
-    if (appReady) {
-      sessionStorage.setItem("pwa-splash-shown", "true")
+    return () => {
+      clearTimeout(fadeTimer);
+      clearTimeout(hideTimer);
+    };
+  }, []);
 
-      // Start fade-out
-      setFading(true)
-
-      const timer = setTimeout(() => {
-        setVisible(false)
-        onComplete && onComplete()
-      }, 600) // must match CSS duration
-
-      return () => clearTimeout(timer)
-    }
-  }, [appReady, onComplete])
-
-  if (!visible) return null
+  if (!visible) return null;
 
   return (
     <div
-      className={`fixed inset-0 z-50 flex items-center justify-center bg-neutral-50 dark:bg-neutral-950
-      transition-opacity duration-500
-      ${fading ? "opacity-0" : "opacity-100"}`}
+      className={`fixed inset-0 z-[100] flex items-center justify-center bg-neutral-50 dark:bg-neutral-950 transition-opacity duration-500 ${
+        fading ? 'opacity-0 pointer-events-none' : 'opacity-100'
+      }`}
     >
       <Image
         src="/VC-2023.jpg"
-        width={200}
-        height={200}
-        alt="Thevaluechain App Logo"
+        width={160}
+        height={160}
+        alt="TheValueChain"
         priority
-        className="animate-pulse motion-reduce:animate-none"
+        className="rounded-lg"
       />
     </div>
-  )
+  );
 }

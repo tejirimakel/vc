@@ -66,11 +66,6 @@ export default function Videos() {
     );
   }
 
-  {videos.length === 0 && !loading && (
-    <p className="text-center text-gray-500 mt-10">No videos found.</p>
-  )}
-  
-
   return (
     <ProtectedRoute>
     <div className="px-2 pt-14 pb-20">
@@ -85,6 +80,9 @@ export default function Videos() {
         <h2 className="text-xl dark:text-neutral-100 font-bold">Videos</h2>
         </Link>
       </nav>
+      {videos.length === 0 && (
+        <p className="text-center text-gray-500 mt-10">No videos found.</p>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
         {displayedVideos.map((video, index) => (
           <div
