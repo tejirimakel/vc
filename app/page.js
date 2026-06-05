@@ -1,10 +1,9 @@
-"use client"
-
 import Image from "next/image"
 import InstallPrompt from "@/components/prompt"
 import MobileRedirect from "@/components/mobileRed"
 import { IoDownload, IoNotifications, IoCloudOffline } from "react-icons/io5"
 import OpenAppButton from "@/components/OpenAppBtn"
+import CurrentYear from "@/components/CurrentYear"
 
 export default function Home() {
   return (
@@ -96,7 +95,7 @@ export default function Home() {
 
       {/* ================= FOOTER ================= */}
       <footer className="py-10 text-center text-sm text-gray-500">
-        © {new Date().getFullYear()} TheValueChain | All rights reserved.
+        © <CurrentYear /> TheValueChain | All rights reserved.
       </footer>
     </main>
   )

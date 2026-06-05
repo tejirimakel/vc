@@ -60,7 +60,13 @@ export default function EcopyDetailPage() {
             console.error("PDF load error:", err);
             setError("Error loading PDF");
           }}
-          loading={<p>Loading document…</p>}
+          loading={
+            <div className="animate-pulse space-y-3">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="h-64 w-full bg-neutral-200 dark:bg-neutral-800 rounded-lg" />
+              ))}
+            </div>
+          }
         >
           {numPages &&
             Array.from({ length: numPages }, (_, i) => (
