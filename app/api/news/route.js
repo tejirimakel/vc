@@ -1,6 +1,9 @@
 export const runtime = 'nodejs'
 
-export async function GET() {
+export async function GET(req) {
+  const { searchParams } = new URL(req.url);
+  const id = searchParams.get('id');
+
   try {
     const res = await fetch(process.env.WORDPRESS_API_URL, {
       next: { revalidate: 60 * 60 * 24 }, // 24h ISR
@@ -27,6 +30,24 @@ export async function GET() {
         )
       ),
     ]
+
+    // Single-article lookup by ID
+    if (id) {
+      const post = sorted.find(p => p.id.toString() === id);
+      if (!post) {
+        return new Response(JSON.stringify({ error: 'Article not found' }), {
+          status: 404,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+      return new Response(JSON.stringify(post), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          'Cache-Control': 'public, max-age=86400',
+        },
+      });
+    }
 
     // Trending heuristic (recent + sticky / featured)
     const trending = sorted

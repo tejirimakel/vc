@@ -45,10 +45,14 @@ export default function Videos() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-pulse">
-          <div className="w-80 h-40 bg-gray-300 dark:bg-neutral-700 rounded-lg mb-2"></div>
-          <div className="w-56 h-4 bg-gray-300 dark:bg-neutral-700 rounded"></div>
+      <div className="px-2 pt-14 pb-20 animate-pulse">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="p-4 rounded-lg shadow-md bg-white dark:bg-neutral-900">
+              <div className="w-full aspect-video bg-neutral-200 dark:bg-neutral-700 rounded-lg" />
+              <div className="mt-2 h-4 bg-neutral-200 dark:bg-neutral-700 rounded w-3/4" />
+            </div>
+          ))}
         </div>
       </div>
     );

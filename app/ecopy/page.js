@@ -58,7 +58,11 @@ export default function PdfPage() {
 
       {/* Loading or Error Handling */}
       {loading ? (
-        <p className="text-center text-xl">Loading PDFs...</p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 animate-pulse">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="rounded-lg bg-neutral-200 dark:bg-neutral-800 h-64" />
+          ))}
+        </div>
       ) : error ? (
         <p className="text-center text-red-500 text-xl">{error}</p>
       ) : pdfs.length > 0 ? (
