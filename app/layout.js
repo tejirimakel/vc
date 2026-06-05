@@ -2,6 +2,7 @@ import React from "react";
 import "./globals.css";
 import { Poppins } from "next/font/google";
 import { AppReadyProvider } from "@/components/appReady";
+import ServiceWorkerRegistration from "@/components/swRegister";
 
 const poppins = Poppins({
   weight: ["300","400","500","600","700","800","900"],
@@ -67,6 +68,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${poppins.className} antialiased`}>
       <body className={`${bodyColor.light} dark:${bodyColor.dark} antialiased`}>
+        <ServiceWorkerRegistration />
         <AppReadyProvider>{children}</AppReadyProvider>
       </body>
     </html>

@@ -27,13 +27,13 @@
   ],
   "screenshots": [
     {
-      "src": "/screenshot-wide.png",
+      "src": "/Screenshot-wide.png",
       "sizes": "1920x1080",
       "type": "image/png",
       "form_factor": "wide"
     },
     {
-      "src": "/screenshot-mobile.png",
+      "src": "/Screenshot-mobile.png",
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow"
@@ -44,33 +44,19 @@
       "name": "Latest News",
       "short_name": "News",
       "description": "View the latest news articles",
-      "url": "/news",
-      "icons": [
-        {
-          "src": "/icons/news-icon.png",
-          "sizes": "96x96",
-          "type": "image/png"
-        }
-      ]
+      "url": "/news"
     },
     {
-      "name": "Live Streaming",
-      "short_name": "Streaming",
-      "description": "Watch live streams",
-      "url": "/live",
-      "icons": [
-        {
-          "src": "/icons/streaming-icon.png",
-          "sizes": "96x96",
-          "type": "image/png"
-        }
-      ]
+      "name": "Live Stream",
+      "short_name": "Live",
+      "description": "Watch live stream",
+      "url": "/stream"
     }
   ],
   "protocol_handlers": [
     {
       "protocol": "web+thevaluechain",
-      "url": "/news?query=%s"
+      "url": "/mobile?query=%s"
     }
   ]
 }

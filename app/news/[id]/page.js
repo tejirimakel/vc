@@ -7,13 +7,14 @@ import { useParams, useRouter } from 'next/navigation';
 import { decode } from 'he';
 import ProtectedRoute from '@/components/protectedRoutes';
 
-
 export default function NewsArticle() {
-  const [newsFeed, setNewsFeed] = useState([]);
+  const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
   const router = useRouter();
-  const params = useParams(); // Get URL parameters
-  const id = params?.id; // Get the dynamic ID
+  const params = useParams();
+  const id = params?.id;
+
   const formatDate = (dateString) => {
     const date = new Date(dateString);
     const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -21,37 +22,33 @@ export default function NewsArticle() {
   };
 
   useEffect(() => {
-    if (!id) return; // Ensure ID is available before fetching data
+    if (!id) return;
 
-    async function fetchData() {
+    async function fetchArticle() {
       try {
-        const response = await fetch("/api/news", {
-          next: { revalidate: 86400 }, // Cache for 24 hours
-        });
+        const response = await fetch(`/api/news?id=${id}`);
+        if (response.status === 404) {
+          setNotFound(true);
+          return;
+        }
         const data = await response.json();
-        setNewsFeed(data.newsFeed);
-        
+        if (data.error) {
+          setNotFound(true);
+          return;
+        }
+        setPost(data);
       } catch (error) {
-        console.error("Error fetching news feed:", error);
+        console.error('Error fetching article:', error);
+        setNotFound(true);
       } finally {
         setLoading(false);
       }
     }
 
-    fetchData();
+    fetchArticle();
   }, [id]);
 
-  if (loading) return <div>Loading...</div>;
-
-  // Find the post with the matching ID
-  const post = newsFeed.find((newsItem) => newsItem.id.toString() === id);
-
-    if (!post) return <p className="text-center text-red-600">Article not found.</p>;
-
-
-  const handleBack = () => {
-    router.back();
-  };
+  const handleBack = () => router.back();
 
   const handleShare = async () => {
     try {
@@ -66,51 +63,71 @@ export default function NewsArticle() {
       }
     } catch (error) {
       console.error('Error sharing:', error);
-      alert('Failed to share this content.');
     }
   };
 
-  const cleanContent = decode(post.content || '')
-  .replace(/<\/?p>/g, '')
-  .replace(/<[^>]+>/g, '')
-  .trim();
+  if (loading) {
+    return (
+      <div className="container mx-auto py-6 animate-pulse">
+        <div className="fixed top-0 left-0 w-full h-12 bg-gray-50/50 dark:bg-neutral-950/50" />
+        <div className="h-8 bg-neutral-200 dark:bg-neutral-800 rounded w-3/4 mt-10 mb-4" />
+        <div className="w-full h-[300px] bg-neutral-200 dark:bg-neutral-800 rounded-lg" />
+        <div className="mt-6 space-y-3">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="h-4 bg-neutral-200 dark:bg-neutral-800 rounded w-full" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
+  if (notFound) {
+    return <p className="text-center text-red-600 mt-20">Article not found.</p>;
+  }
+
+  const cleanContent = decode(post.content || '')
+    .replace(/<\/?p>/g, '')
+    .replace(/<[^>]+>/g, '')
+    .trim();
 
   return (
     <ProtectedRoute>
-    <div className="container mx-auto py-6">
-      <nav className="fixed top-0 left-0 w-full z-50 bg-gray-50/50 dark:bg-neutral-950/50 px-2 py-2 backdrop-blur-md shadow-sm">
-      <NavButtons onBack={handleBack} onShare={handleShare} />
-      </nav>
+      <div className="container mx-auto py-6">
+        <nav className="fixed top-0 left-0 w-full z-50 bg-gray-50/50 dark:bg-neutral-950/50 px-2 py-2 backdrop-blur-md shadow-sm">
+          <NavButtons onBack={handleBack} onShare={handleShare} />
+        </nav>
 
-      <h1 className="text-xl sm:text-3xl font-bold dark:text-neutral-200 mt-8 mb-4">
-{post.title}</h1>
+        <h1 className="text-xl sm:text-3xl font-bold dark:text-neutral-200 mt-8 mb-4">
+          {post.title}
+        </h1>
 
-      {post.image && (
-        <Image
-          className="w-full h-[300px] object-cover rounded-lg"
-          src={post.image}
-          alt={post.title}
-          width={800}
-          height={400}
-          quality={100}
-        />
-      )}
+        {post.image && (
+          <Image
+            className="w-full h-[300px] object-cover rounded-lg"
+            src={post.image}
+            alt={post.title}
+            width={800}
+            height={400}
+            quality={100}
+          />
+        )}
 
-      <div className="mt-6 mb-12 dark:text-neutral-200 space-y-2">
-        <div className='flex justify-between items-center'>
-        <span className="bg-red-700 p-2 m-0 text-xs text-neutral-200 rounded-lg">{post.categories}</span>
-        <p className="text-xs text-gray-600 dark:text-neutral-400">{formatDate(post.date)}</p>
+        <div className="mt-6 mb-12 dark:text-neutral-200 space-y-2">
+          <div className="flex justify-between items-center">
+            <span className="bg-red-700 p-2 m-0 text-xs text-neutral-200 rounded-lg">
+              {post.categories}
+            </span>
+            <p className="text-xs text-gray-600 dark:text-neutral-400">{formatDate(post.date)}</p>
+          </div>
+          {cleanContent.split('\n').map((paragraph, index) => (
+            <p key={index} className="text-base mt-4 mb-4">
+              {paragraph}
+            </p>
+          ))}
         </div>
-        {cleanContent.split('\n').map((paragraph, index) => (
-          <p key={index} className="text-base mt-4 mb-4">
-            {paragraph}
-          </p>
-        ))}
-      </div>
 
-      <Navbar />
-    </div>
+        <Navbar />
+      </div>
     </ProtectedRoute>
   );
 }

@@ -7,7 +7,7 @@ import Link from "next/link";
 import { MdOutlineFeed } from "react-icons/md";
 import { IoMdSearch } from "react-icons/io";
 import { useRouter } from "next/navigation";
-//import SearchOverlay from "@/components/searchOverlay";
+import SearchOverlay from "@/components/searchOverlay";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import "swiper/css";
@@ -88,7 +88,29 @@ export default function MobileHome() {
           />
         </div>
       )}
-      {!isLoading && (
+      {!isLoading && newsFeed.length === 0 && !searchQuery && (
+        <div className="container mx-auto pt-12 pb-20 animate-pulse">
+          <div className="w-full h-[300px] rounded-lg bg-neutral-200 dark:bg-neutral-800" />
+          <div className="mt-6 flex space-x-3">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-8 w-20 rounded-full bg-neutral-200 dark:bg-neutral-800" />
+            ))}
+          </div>
+          <div className="mt-6 space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="flex p-4 bg-white dark:bg-neutral-900 rounded-lg shadow-sm gap-4">
+                <div className="min-w-[120px] w-[120px] h-[120px] rounded-lg bg-neutral-200 dark:bg-neutral-800 flex-shrink-0" />
+                <div className="flex-1 space-y-2 pt-1">
+                  <div className="h-4 bg-neutral-200 dark:bg-neutral-800 rounded w-full" />
+                  <div className="h-4 bg-neutral-200 dark:bg-neutral-800 rounded w-3/4" />
+                  <div className="h-3 bg-neutral-200 dark:bg-neutral-800 rounded w-1/4 mt-2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {!isLoading && (newsFeed.length > 0 || searchQuery) && (
         <>
           <nav className="fixed top-0 left-0 w-full z-50 bg-neutral-50/50 dark:bg-neutral-950/50 px-2 backdrop-blur-md shadow-sm">
             <div className="flex justify-between items-center p-4">
@@ -102,15 +124,14 @@ export default function MobileHome() {
                   quality={100}
                 />
               </div>
-              {/*
               <div className="flex items-center">
-              <button
-                    onClick={() => setSearchOpen(true)}
-                    className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-800"
-                  >
-                    <IoMdSearch className="w-5 h-5 text-neutral-800 dark:text-neutral-200" />
-                  </button>
-              </div> */}
+                <button
+                  onClick={() => setSearchOpen(true)}
+                  className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-800"
+                >
+                  <IoMdSearch className="w-5 h-5 text-neutral-800 dark:text-neutral-200" />
+                </button>
+              </div>
             </div>
           </nav>
 
@@ -213,12 +234,12 @@ export default function MobileHome() {
           </div>
         </>
       )}
-       {/*  <SearchOverlay
+      <SearchOverlay
         open={searchOpen}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         onClose={() => setSearchOpen(false)}
-      />*/}
+      />
       <Navbar />
     </div>
 </ProtectedRoutes>
