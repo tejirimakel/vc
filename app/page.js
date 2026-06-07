@@ -45,7 +45,7 @@ export default function Home() {
 
       <section className="relative isolate flex min-h-[86vh] overflow-hidden bg-[#080910] px-5 py-7 text-white sm:min-h-[82vh] sm:px-8">
         <Image
-          src="/2.png"
+          src="/Screenshot-wide.png"
           alt="TheValueChain app interface"
           fill
           priority
@@ -92,7 +92,7 @@ export default function Home() {
           <div className="hidden md:flex md:justify-end">
             <div className="relative w-full max-w-[18rem] overflow-hidden rounded-lg border border-white/15 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.42)]">
               <Image
-                src="/26.png"
+                src="/Screenshot-mobile.png"
                 alt="TheValueChain mobile news feed"
                 width={782}
                 height={1692}

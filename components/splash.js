@@ -1,18 +1,15 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
+import { isInstalledPwa } from '@/lib/pwaDisplayMode';
 
 export default function SplashScreen() {
   const [visible, setVisible] = useState(false);
   const [fading, setFading] = useState(false);
 
   useEffect(() => {
-    const isStandalone =
-      window.matchMedia('(display-mode: standalone)').matches ||
-      window.navigator.standalone === true;
-
     if (sessionStorage.getItem('splashShown')) return;
-    if (!isStandalone) return;
+    if (!isInstalledPwa()) return;
 
     setVisible(true);
     sessionStorage.setItem('splashShown', 'true');

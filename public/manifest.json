@@ -3,7 +3,7 @@
   "name": "Thevaluechain Live News & Streaming App",
   "short_name": "Thevaluechain",
   "description": "Thevaluechain Live News & Streaming App",
-  "start_url": "/mobile",
+  "start_url": "/pwa-launch",
   "scope": "/",
   "display_override": ["standalone", "minimal-ui"],
   "display": "standalone",
