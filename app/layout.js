@@ -5,19 +5,17 @@ import { AppReadyProvider } from "@/components/appReady";
 import ServiceWorkerRegistration from "@/components/swRegister";
 
 const poppins = Poppins({
-  weight: ["300","400","500","600","700","800","900"],
+  weight: ["300", "400", "500", "600", "700", "800", "900"],
   style: "normal",
   subsets: ["latin"],
   display: "swap",
-  adjustFontFallback: false,
 });
 
 export const viewport = {
   width: "device-width",
   initialScale: 1,
   minimumScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
 };
 
 export const metadata = {
@@ -60,14 +58,9 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
-  const bodyColor = {
-    light: "bg-gray-50",
-    dark: "bg-neutral-950",
-  };
-
   return (
     <html lang="en" className={`${poppins.className} antialiased`}>
-      <body className={`${bodyColor.light} dark:${bodyColor.dark} antialiased`}>
+      <body className="bg-gray-50 dark:bg-neutral-950 antialiased">
         <ServiceWorkerRegistration />
         <AppReadyProvider>{children}</AppReadyProvider>
       </body>

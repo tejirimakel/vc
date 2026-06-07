@@ -3,6 +3,9 @@
 import { useEffect, useState } from "react"
 import { IoClose } from "react-icons/io5"
 
+const COOKIE_FLAGS = "; path=/; max-age=604800; SameSite=Lax; Secure"
+const INSTALLED_FLAGS = "; path=/; max-age=31536000; SameSite=Lax; Secure"
+
 export default function InstallPrompt() {
   const [deferredPrompt, setDeferredPrompt] = useState(null)
   const [visible, setVisible] = useState(false)
@@ -15,16 +18,11 @@ export default function InstallPrompt() {
       window.navigator.standalone === true
 
     setIsStandalone(standalone)
-
     if (standalone) return
 
-    if (document.cookie.includes("pwa-install-dismissed=true")) {
-      return
-    }
+    if (document.cookie.includes("pwa-install-dismissed=true")) return
 
-    const ios =
-      /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase())
-
+    const ios = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase())
     setIsIos(ios)
 
     if (ios) {
@@ -38,37 +36,29 @@ export default function InstallPrompt() {
       setVisible(true)
     }
 
-    window.addEventListener(
-      "beforeinstallprompt",
-      handleBeforeInstallPrompt
-    )
-
-    return () => {
-      window.removeEventListener(
-        "beforeinstallprompt",
-        handleBeforeInstallPrompt
-      )
-    }
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
+    return () => window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt)
   }, [])
 
   const handleInstall = async () => {
     if (!deferredPrompt) return
-
     deferredPrompt.prompt()
     const choiceResult = await deferredPrompt.userChoice
-
     if (choiceResult.outcome === "accepted") {
-      document.cookie =
-        "pwa-installed=true; path=/; max-age=31536000"
+      document.cookie = "pwa-installed=true" + INSTALLED_FLAGS
+      await fetch("/api/pwa/access", {
+        method: "POST",
+        headers: { "x-tvc-pwa-launch": "install-accepted" },
+      }).catch((error) => {
+        console.error("PWA access failed:", error)
+      })
     }
-
     setDeferredPrompt(null)
     setVisible(false)
   }
 
   const handleClose = () => {
-    document.cookie =
-      "pwa-install-dismissed=true; path=/; max-age=604800" // 7 days
+    document.cookie = "pwa-install-dismissed=true" + COOKIE_FLAGS
     setVisible(false)
   }
 
@@ -80,9 +70,8 @@ export default function InstallPrompt() {
         <p className="text-sm">
           Install Thevaluechain for a better reading experience
         </p>
-
-        <button onClick={handleClose}>
-          <IoClose className="w-6 h-6" />
+        <button onClick={handleClose} aria-label="Dismiss install prompt">
+          <IoClose className="w-6 h-6" aria-hidden="true" />
         </button>
       </div>
 
@@ -97,8 +86,7 @@ export default function InstallPrompt() {
 
       {isIos && (
         <p className="mt-3 text-sm text-gray-300">
-          Tap the Share icon and select{" "}
-          <strong>Add to Home Screen</strong>
+          Tap the Share icon and select <strong>Add to Home Screen</strong>
         </p>
       )}
     </div>

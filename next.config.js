@@ -1,4 +1,26 @@
 /** @type {import('next').NextConfig} */
+
+const appCSP = [
+  "default-src 'self'",
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  "font-src 'self' https://fonts.gstatic.com",
+  "img-src 'self' data: https: blob:",
+  "media-src 'self' blob: https:",
+  "connect-src 'self' https://thevaluechainng.com https://www.thevaluechainng.com https://www.youtube.com",
+  "frame-src https://www.youtube.com https://youtube.com",
+  "worker-src 'self' blob:",
+  "manifest-src 'self'",
+].join('; ');
+
+const swCSP = [
+  "default-src 'self'",
+  "script-src 'self'",
+  "connect-src 'self' https://thevaluechainng.com https://www.thevaluechainng.com",
+  "img-src 'self' data: https:",
+  "style-src 'self' 'unsafe-inline'",
+].join('; ');
+
 const nextConfig = {
   reactStrictMode: true,
   images: {
@@ -6,12 +28,11 @@ const nextConfig = {
       { protocol: "https", hostname: "thevaluechainng.com" },
       { protocol: "https", hostname: "www.thevaluechainng.com" },
     ],
-    qualities: [75, 85, 95, 100],
   },
   webpack(config) {
     config.module.rules.push({
       test: /pdf\.worker\.(min\.)?js$/,
-      use: { loader: 'file-loader' },
+      type: 'asset/resource',
     });
     config.resolve.extensions.push('.mjs');
     return config;
@@ -27,6 +48,7 @@ const nextConfig = {
           { key: 'Permissions-Policy', value: 'geolocation=(), microphone=(), camera=()' },
           { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
           { key: 'X-DNS-Prefetch-Control', value: 'on' },
+          { key: 'Content-Security-Policy', value: appCSP },
         ],
       },
       {
@@ -34,17 +56,11 @@ const nextConfig = {
         headers: [
           { key: 'Content-Type', value: 'application/javascript; charset=utf-8' },
           { key: 'Cache-Control', value: 'no-cache, no-store, must-revalidate' },
-          { key: 'Content-Security-Policy', value: `
-            default-src 'self';
-            script-src 'self' 'unsafe-eval';
-            connect-src 'self' https://thevaluechainng.com https://www.thevaluechainng.com;
-            img-src 'self' data: https:;
-            style-src 'self' 'unsafe-inline';
-          `.replace(/\s{2,}/g, ' ').trim() },
+          { key: 'Content-Security-Policy', value: swCSP },
         ],
       },
-    ]
+    ];
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;

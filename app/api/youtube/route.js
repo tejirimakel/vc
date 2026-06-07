@@ -40,7 +40,7 @@ export async function GET() {
       return {
         id: videoId,
         title: entry.title?.[0] || 'Untitled',
-        description: entry.summary?.[0] || '',
+        description: media?.['media:description']?.[0] || '',
         thumbnailUrl: thumbnail,
         published: entry.published?.[0] || null,
         link: `https://www.youtube.com/watch?v=${videoId}`,

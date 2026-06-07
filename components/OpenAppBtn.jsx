@@ -6,24 +6,42 @@ import { useRouter } from "next/navigation"
 
 export default function OpenAppButton() {
   const [installed, setInstalled] = useState(false)
+  const [opening, setOpening] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
     setInstalled(
       window.matchMedia("(display-mode: standalone)").matches ||
-        window.navigator.standalone === true
+      window.navigator.standalone === true
     )
   }, [])
 
   if (!installed) return null
 
+  const handleOpen = async () => {
+    setOpening(true)
+    try {
+      const response = await fetch("/api/pwa/access", {
+        method: "POST",
+        headers: { "x-tvc-pwa-launch": "standalone" },
+      })
+      if (!response.ok) throw new Error("PWA access failed")
+      router.push("/mobile")
+    } catch (error) {
+      console.error("PWA access failed:", error)
+      setOpening(false)
+    }
+  }
+
   return (
     <button
-      onClick={() => router.push("/mobile")}
-      className="inline-flex items-center gap-2 rounded-full bg-black px-6 py-3 text-white dark:bg-white dark:text-black"
+      type="button"
+      onClick={handleOpen}
+      disabled={opening}
+      className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-red-700 px-6 text-sm font-bold text-white shadow-lg shadow-red-700/20 transition-colors hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-700/35 disabled:cursor-wait disabled:opacity-70"
     >
-      <IoOpenOutline className="h-5 w-5" />
-      Open App
+      <IoOpenOutline className="h-5 w-5" aria-hidden="true" />
+      {opening ? "Opening..." : "Open App"}
     </button>
   )
 }

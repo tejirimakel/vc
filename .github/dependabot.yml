@@ -1,0 +1,52 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Africa/Lagos
+    open-pull-requests-limit: 10
+    groups:
+      react-ecosystem:
+        patterns:
+          - "react"
+          - "react-dom"
+          - "react-*"
+          - "@types/react*"
+      next-ecosystem:
+        patterns:
+          - "next"
+          - "eslint-config-next"
+      tailwind-ecosystem:
+        patterns:
+          - "tailwindcss"
+          - "@tailwindcss/*"
+          - "postcss*"
+          - "@types/node"
+      minor-patch:
+        update-types:
+          - minor
+          - patch
+    labels:
+      - dependencies
+      - automated
+    commit-message:
+      prefix: "chore(deps)"
+      include: scope
+    reviewers:
+      - Tejiri
+
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Africa/Lagos
+    labels:
+      - dependencies
+      - github-actions
+    commit-message:
+      prefix: "chore(ci)"

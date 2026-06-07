@@ -8,18 +8,33 @@ export default function MobileRedirect() {
   const pathname = usePathname()
 
   useEffect(() => {
+    let cancelled = false
+
     const isStandalone =
       window.matchMedia("(display-mode: standalone)").matches ||
       window.navigator.standalone === true
 
-    // Already on correct route → do nothing
-    if (isStandalone && pathname === "/mobile") return
     if (!isStandalone && pathname === "/") return
 
     if (isStandalone) {
-      router.replace("/mobile")
+      fetch("/api/pwa/access", {
+        method: "POST",
+        headers: { "x-tvc-pwa-launch": "standalone" },
+      })
+        .then((response) => {
+          if (!response.ok) throw new Error("PWA access failed")
+          if (!cancelled && pathname !== "/mobile") router.replace("/mobile")
+        })
+        .catch((error) => {
+          console.error("PWA access failed:", error)
+          if (!cancelled && pathname !== "/") router.replace("/")
+        })
     } else {
       router.replace("/")
+    }
+
+    return () => {
+      cancelled = true
     }
   }, [router, pathname])
 

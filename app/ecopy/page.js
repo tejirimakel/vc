@@ -1,28 +1,93 @@
 'use client';
+
 import Navbar from "@/components/nav";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { IoMdArrowRoundBack } from "react-icons/io";
-import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import {
+  IoAlertCircleOutline,
+  IoCalendarOutline,
+  IoChevronBack,
+  IoChevronForward,
+  IoDocumentTextOutline,
+  IoReloadOutline,
+  IoSearchOutline,
+} from "react-icons/io5";
+import { BsFiletypePdf } from "react-icons/bs";
 import Link from "next/link";
-import PdfViewerComponent from "@/components/PdfViewerComponent";
 import ProtectedRoutes from "@/components/protectedRoutes";
+
+const formatDate = (dateString) => {
+  if (!dateString) return "Latest edition";
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return "Latest edition";
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(date);
+};
+
+function PdfCard({ pdf }) {
+  return (
+    <article className="flex min-h-44 flex-col justify-between overflow-hidden rounded-lg border border-black/10 bg-white shadow-sm transition-colors hover:border-red-700/30 dark:border-white/10 dark:bg-white/5 dark:hover:border-red-300/40">
+      <div className="flex items-start gap-4 p-4">
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300">
+          <BsFiletypePdf className="h-9 w-9" aria-hidden="true" />
+        </div>
+        <div className="min-w-0">
+          <p className="text-sm font-black leading-5 text-neutral-950 dark:text-neutral-100">
+            {pdf.title}
+          </p>
+          <p className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-neutral-500 dark:text-neutral-400">
+            <IoCalendarOutline className="h-4 w-4" aria-hidden="true" />
+            {formatDate(pdf.date)}
+          </p>
+        </div>
+      </div>
+      <div className="flex items-center justify-between border-t border-black/10 px-4 py-3 text-xs font-bold text-neutral-500 dark:border-white/10 dark:text-neutral-400">
+        <span>PDF edition</span>
+        <span className="inline-flex items-center gap-1 text-red-700 dark:text-red-300">
+          Open
+          <IoChevronForward className="h-4 w-4" aria-hidden="true" />
+        </span>
+      </div>
+    </article>
+  );
+}
+
+function PdfSkeleton() {
+  return (
+    <div className="mx-auto max-w-4xl px-4 pb-28 pt-24 animate-pulse">
+      <div className="h-4 w-28 rounded bg-neutral-200 dark:bg-neutral-800" />
+      <div className="mt-3 h-9 w-48 rounded bg-neutral-200 dark:bg-neutral-800" />
+      <div className="mt-5 h-12 rounded-full bg-neutral-200 dark:bg-neutral-800" />
+      <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {[...Array(6)].map((_, i) => (
+          <div key={i} className="h-44 rounded-lg bg-neutral-200 dark:bg-neutral-800" />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function PdfPage() {
   const [pdfs, setPdfs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [query, setQuery] = useState("");
+  const [retryCount, setRetryCount] = useState(0);
   const pdfsPerPage = 6;
   const router = useRouter();
 
   useEffect(() => {
     async function fetchData() {
+      setLoading(true);
+      setError(null);
+
       try {
         const response = await fetch("/api/ecopy");
-        if (!response.ok) {
-          throw new Error("Failed to fetch PDFs");
-        }
+        if (!response.ok) throw new Error("Failed to fetch PDFs");
         const data = await response.json();
         setPdfs(data.pdfs || []);
       } catch (err) {
@@ -33,99 +98,138 @@ export default function PdfPage() {
     }
 
     fetchData();
-  }, []);
+  }, [retryCount]);
 
-  // Calculate pagination range
-  const totalPages = Math.ceil(pdfs.length / pdfsPerPage);
-  const startIndex = (currentPage - 1) * pdfsPerPage;
-  const displayedPdfs = pdfs.slice(startIndex, startIndex + pdfsPerPage);
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [query]);
+
+  const filteredPdfs = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery) return pdfs;
+    return pdfs.filter((pdf) =>
+      `${pdf.title ?? ""} ${pdf.date ?? ""}`.toLowerCase().includes(normalizedQuery)
+    );
+  }, [pdfs, query]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredPdfs.length / pdfsPerPage));
+  const safeCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (safeCurrentPage - 1) * pdfsPerPage;
+  const displayedPdfs = filteredPdfs.slice(startIndex, startIndex + pdfsPerPage);
 
   return (
     <ProtectedRoutes>
-    <div className="pt-12 pb-20 px-3">
-      {/* Top Navigation Bar */}
-      <nav className="flex items-center justify-between fixed top-0 left-0 w-full z-50 bg-gray-50/60 dark:bg-neutral-950/50 px-6 py-4 backdrop-blur-md shadow-sm">
-        <button
-          onClick={() => router.back()}
-          className="text-gray-800 dark:text-neutral-100"
-        >
-          <IoMdArrowRoundBack className="w-6 h-6" />
-        </button>
-        <Link href="/ecopy">
-          <h2 className="text-xl dark:text-neutral-100 font-bold">Ecopy</h2>
-        </Link>
-      </nav>
-
-      {/* Loading or Error Handling */}
-      {loading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 animate-pulse">
-          {[...Array(6)].map((_, i) => (
-            <div key={i} className="rounded-lg bg-neutral-200 dark:bg-neutral-800 h-64" />
-          ))}
-        </div>
-      ) : error ? (
-        <p className="text-center text-red-500 text-xl">{error}</p>
-      ) : pdfs.length > 0 ? (
-        <>
-          {/* PDF Viewer Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            {displayedPdfs.map((pdf) => (
-              <Link
-                key={pdf.id}
-                href={{
-                  pathname: `/ecopy/${pdf.id}`,
-                  query: { url: pdf.url, title: pdf.title },
-                }}
-                className="hover:scale-[1.02] transition-transform"
-              >
-                <PdfViewerComponent
-                  
-                  pdfUrl={pdf.url}
-                />
-              </Link>
-            ))}
+      <div className="min-h-screen bg-[#f5f7fb] text-neutral-950 dark:bg-[#07080c] dark:text-neutral-50">
+        <nav className="fixed left-0 top-0 z-50 w-full border-b border-black/10 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-[#090b10]/90">
+          <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
+            <button
+              onClick={() => router.back()}
+              className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-black/10 bg-white/85 text-neutral-800 shadow-sm backdrop-blur transition-colors hover:bg-white focus:outline-none focus:ring-2 focus:ring-red-700/25 dark:border-white/10 dark:bg-white/10 dark:text-neutral-100 dark:hover:bg-white/15"
+              aria-label="Go back"
+            >
+              <IoChevronBack className="h-6 w-6" aria-hidden="true" />
+            </button>
+            <Link href="/ecopy" className="text-sm font-black text-neutral-900 dark:text-neutral-100">
+              E-copy
+            </Link>
+            <div className="h-11 w-11" aria-hidden="true" />
           </div>
+        </nav>
 
-          {/* Pagination Controls */}
-          {pdfs.length > pdfsPerPage && (
-            <div className="flex text-sm justify-center items-center mt-6 space-x-6">
-              <button
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className={`px-4 py-2 rounded-lg font-semibold flex items-center ${
-                  currentPage === 1
-                    ? "text-neutral-700 dark:text-neutral-800 cursor-not-allowed"
-                    : "text-neutral-900 dark:text-neutral-500 hover:text-red-700"
-                }`}
-              >
-                <FaArrowLeft className="mr-2" /> Previous
-              </button>
-              <span className="text-sm dark:text-neutral-600">
-                Page {currentPage} of {totalPages}
-              </span>
-              <button
-                onClick={() =>
-                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                }
-                disabled={currentPage === totalPages}
-                className={`px-4 py-2 rounded-lg font-semibold flex items-center ${
-                  currentPage === totalPages
-                    ? "text-neutral-700 dark:text-neutral-800 cursor-not-allowed"
-                    : "text-neutral-900 dark:text-neutral-500 hover:text-red-700"
-                }`}
-              >
-                Next <FaArrowRight className="ml-2" />
-              </button>
+        {loading ? (
+          <PdfSkeleton />
+        ) : (
+          <main className="mx-auto max-w-4xl px-4 pb-28 pt-24">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <p className="text-sm font-bold uppercase text-red-700 dark:text-red-300">
+                  Digital editions
+                </p>
+                <h1 className="mt-1 text-3xl font-black">E-copy Library</h1>
+              </div>
+              <p className="rounded-full bg-white px-3 py-1 text-xs font-bold text-neutral-500 shadow-sm dark:bg-white/10 dark:text-neutral-300">
+                {filteredPdfs.length} files
+              </p>
             </div>
-          )}
-        </>
-      ) : (
-        <p className="text-center text-xl">No PDFs available.</p>
-      )}
 
-      {/* Bottom Navbar */}
-      <Navbar />
-    </div>
-</ProtectedRoutes>
+            <label className="mt-5 flex h-12 items-center gap-3 rounded-full border border-black/10 bg-white px-4 shadow-sm dark:border-white/10 dark:bg-white/5">
+              <IoSearchOutline className="h-5 w-5 text-red-700 dark:text-red-300" aria-hidden="true" />
+              <input
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Search editions"
+                className="min-w-0 flex-1 bg-transparent text-sm font-medium text-neutral-900 outline-none placeholder:text-neutral-400 dark:text-neutral-100"
+                aria-label="Search PDF editions"
+              />
+            </label>
+
+            {error ? (
+              <section className="mt-8 rounded-lg border border-red-200 bg-red-50 p-6 text-center dark:border-red-500/20 dark:bg-red-500/10">
+                <IoAlertCircleOutline className="mx-auto h-11 w-11 text-red-700 dark:text-red-300" aria-hidden="true" />
+                <h2 className="mt-3 text-lg font-black">Could not load editions</h2>
+                <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300">{error}</p>
+                <button
+                  onClick={() => setRetryCount((count) => count + 1)}
+                  className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-red-700 px-5 text-sm font-bold text-white transition-colors hover:bg-red-600"
+                >
+                  <IoReloadOutline className="h-5 w-5" aria-hidden="true" />
+                  Retry
+                </button>
+              </section>
+            ) : displayedPdfs.length > 0 ? (
+              <>
+                <section className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2" aria-label="PDF editions">
+                  {displayedPdfs.map((pdf) => (
+                    <Link
+                      key={pdf.id ?? pdf.url}
+                      href={{
+                        pathname: `/ecopy/${encodeURIComponent(pdf.id ?? pdf.title)}`,
+                        query: { url: pdf.url, title: pdf.title },
+                      }}
+                    >
+                      <PdfCard pdf={pdf} />
+                    </Link>
+                  ))}
+                </section>
+
+                {filteredPdfs.length > pdfsPerPage && (
+                  <div className="mt-6 flex items-center justify-between rounded-lg border border-black/10 bg-white p-3 shadow-sm dark:border-white/10 dark:bg-white/5">
+                    <button
+                      onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                      disabled={safeCurrentPage === 1}
+                      className="inline-flex h-10 items-center gap-2 rounded-full px-3 text-sm font-bold text-neutral-800 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:text-neutral-400 dark:text-neutral-100 dark:hover:bg-white/10 dark:disabled:text-neutral-600"
+                    >
+                      <IoChevronBack className="h-5 w-5" aria-hidden="true" />
+                      Prev
+                    </button>
+                    <span className="text-xs font-bold text-neutral-500 dark:text-neutral-400">
+                      Page {safeCurrentPage} of {totalPages}
+                    </span>
+                    <button
+                      onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                      disabled={safeCurrentPage === totalPages}
+                      className="inline-flex h-10 items-center gap-2 rounded-full px-3 text-sm font-bold text-neutral-800 transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:text-neutral-400 dark:text-neutral-100 dark:hover:bg-white/10 dark:disabled:text-neutral-600"
+                    >
+                      Next
+                      <IoChevronForward className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <section className="mt-8 rounded-lg border border-dashed border-black/15 bg-white/70 p-8 text-center dark:border-white/15 dark:bg-white/5">
+                <IoDocumentTextOutline className="mx-auto h-11 w-11 text-neutral-400" aria-hidden="true" />
+                <p className="mt-3 text-sm font-semibold text-neutral-500 dark:text-neutral-400">
+                  No PDF editions match this search.
+                </p>
+              </section>
+            )}
+          </main>
+        )}
+
+        <Navbar />
+      </div>
+    </ProtectedRoutes>
   );
 }

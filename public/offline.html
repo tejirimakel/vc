@@ -16,16 +16,21 @@
         margin-top: 20px;
         padding: 10px 20px;
         font-size: 18px;
+        cursor: pointer;
       }
     </style>
   </head>
   <body>
     <h1>No Internet Connection</h1>
     <p>Please connect to the internet and refresh the page.</p>
-    <button class="btn" onclick="location.reload()">Refresh</button>
+    <button class="btn" id="refreshBtn">Refresh</button>
     <script>
-      // If connection is restored, reload automatically
-      window.addEventListener("online", () => location.reload());
+      document.getElementById("refreshBtn").addEventListener("click", function () {
+        location.reload();
+      });
+      window.addEventListener("online", function () {
+        location.reload();
+      });
     </script>
   </body>
 </html>

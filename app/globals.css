@@ -3,16 +3,14 @@
 :root {
   --background: #171717;
   --foreground: #f8f8f8;
-  --font-sans: 'Poppins', sans-serif;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-sans);
 }
 
-@media (forced-colors: active) and (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0515;
     --foreground: #ededed;
@@ -51,7 +49,6 @@ html {
 }
 
 body {
-  font-family: var(--font-sans);
   margin: 0;
   padding: 0;
 }

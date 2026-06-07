@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Navbar from '@/components/nav';
 import ProtectedRoutes from '@/components/protectedRoutes';
 import { useRouter } from 'next/navigation';
@@ -8,9 +8,13 @@ export default function StreamPage() {
   const [streamUrl, setStreamUrl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const videoRef = useRef(null);
+  const hlsRef = useRef(null);
   const router = useRouter();
 
-  useEffect(() => {
+  const loadStream = useCallback(() => {
+    setLoading(true);
+    setError(null);
     fetch('/api/stream')
       .then((r) => r.json())
       .then((data) => {
@@ -21,6 +25,48 @@ export default function StreamPage() {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    loadStream();
+  }, [loadStream]);
+
+  useEffect(() => {
+    if (!streamUrl || !videoRef.current) return;
+
+    const video = videoRef.current;
+    const isHls = streamUrl.includes('.m3u8');
+
+    if (!isHls) {
+      video.src = streamUrl;
+      return;
+    }
+
+    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      // Safari supports HLS natively
+      video.src = streamUrl;
+    } else {
+      import('hls.js').then(({ default: Hls }) => {
+        if (!Hls.isSupported()) {
+          setError('Live streaming is not supported in this browser.');
+          return;
+        }
+        const hls = new Hls();
+        hlsRef.current = hls;
+        hls.loadSource(streamUrl);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.ERROR, (_, data) => {
+          if (data.fatal) setError('Stream error. Please retry.');
+        });
+      });
+    }
+
+    return () => {
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+    };
+  }, [streamUrl]);
+
   return (
     <ProtectedRoutes>
       <div className="flex flex-col min-h-screen bg-inherit pb-20">
@@ -29,6 +75,7 @@ export default function StreamPage() {
           <button
             onClick={() => router.back()}
             className="text-sm text-neutral-500 dark:text-neutral-400"
+            aria-label="Go back"
           >
             Back
           </button>
@@ -44,18 +91,7 @@ export default function StreamPage() {
               <p className="text-lg dark:text-neutral-300 font-semibold">Stream Unavailable</p>
               <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-2">{error}</p>
               <button
-                onClick={() => {
-                  setLoading(true);
-                  setError(null);
-                  fetch('/api/stream')
-                    .then((r) => r.json())
-                    .then((data) => {
-                      if (data.error) setError(data.error);
-                      else setStreamUrl(data.url);
-                    })
-                    .catch(() => setError('Could not load stream'))
-                    .finally(() => setLoading(false));
-                }}
+                onClick={loadStream}
                 className="mt-6 px-6 py-2 bg-red-700 text-white rounded-full text-sm"
               >
                 Retry
@@ -69,14 +105,13 @@ export default function StreamPage() {
                 Rotate device for best experience
               </p>
               <video
-                key={streamUrl}
+                ref={videoRef}
                 controls
                 autoPlay
                 playsInline
+                crossOrigin="anonymous"
                 className="w-full rounded-lg aspect-video bg-black"
               >
-                <source src={streamUrl} type="application/x-mpegURL" />
-                <source src={streamUrl} type="video/mp4" />
                 Your browser does not support video playback.
               </video>
             </>
