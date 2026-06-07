@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 import { usePathname, useRouter } from "next/navigation"
+import { isInstalledPwa } from "@/lib/pwaDisplayMode"
 
 export default function MobileRedirect() {
   const router = useRouter()
@@ -10,13 +11,11 @@ export default function MobileRedirect() {
   useEffect(() => {
     let cancelled = false
 
-    const isStandalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      window.navigator.standalone === true
+    const installedPwa = isInstalledPwa()
 
-    if (!isStandalone && pathname === "/") return
+    if (!installedPwa && pathname === "/") return
 
-    if (isStandalone) {
+    if (installedPwa) {
       fetch("/api/pwa/access", {
         method: "POST",
         headers: { "x-tvc-pwa-launch": "standalone" },

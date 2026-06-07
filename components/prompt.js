@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { IoClose } from "react-icons/io5"
+import { isInstalledPwa } from "@/lib/pwaDisplayMode"
 
 const COOKIE_FLAGS = "; path=/; max-age=604800; SameSite=Lax; Secure"
 const INSTALLED_FLAGS = "; path=/; max-age=31536000; SameSite=Lax; Secure"
@@ -13,9 +14,7 @@ export default function InstallPrompt() {
   const [isIos, setIsIos] = useState(false)
 
   useEffect(() => {
-    const standalone =
-      window.matchMedia("(display-mode: standalone)").matches ||
-      window.navigator.standalone === true
+    const standalone = isInstalledPwa()
 
     setIsStandalone(standalone)
     if (standalone) return

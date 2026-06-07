@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { IoOpenOutline } from "react-icons/io5"
 import { useRouter } from "next/navigation"
+import { isInstalledPwa } from "@/lib/pwaDisplayMode"
 
 export default function OpenAppButton() {
   const [installed, setInstalled] = useState(false)
@@ -10,10 +11,7 @@ export default function OpenAppButton() {
   const router = useRouter()
 
   useEffect(() => {
-    setInstalled(
-      window.matchMedia("(display-mode: standalone)").matches ||
-      window.navigator.standalone === true
-    )
+    setInstalled(isInstalledPwa())
   }, [])
 
   if (!installed) return null
