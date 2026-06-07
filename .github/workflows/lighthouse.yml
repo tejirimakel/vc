@@ -1,0 +1,124 @@
+name: Lighthouse CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  lighthouse:
+    name: Lighthouse Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline
+
+      - name: Build Next.js app
+        run: npm run build
+        env:
+          NODE_ENV: production
+
+      - name: Install Lighthouse CI
+        run: npm install -g @lhci/cli@0.14.x
+
+      - name: Start production server
+        run: npm start &
+        env:
+          NODE_ENV: production
+          PORT: 3000
+
+      - name: Wait for server to be ready
+        run: npx wait-on http://localhost:3000 --timeout 60000
+
+      - name: Run Lighthouse CI
+        id: lhci
+        run: lhci autorun
+        env:
+          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+
+      - name: Upload Lighthouse results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: lighthouse-results
+          path: .lighthouseci/
+          retention-days: 30
+
+      - name: Parse and comment results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const dir = '.lighthouseci';
+            if (!fs.existsSync(dir)) {
+              console.log('No Lighthouse results found');
+              return;
+            }
+            const files = fs.readdirSync(dir).filter(f => f.endsWith('.json') && f.startsWith('lhr-'));
+            if (!files.length) return;
+            const results = JSON.parse(fs.readFileSync(path.join(dir, files[0]), 'utf8'));
+            const cats = results.categories;
+            const score = (c) => Math.round((cats[c]?.score ?? 0) * 100);
+            const emoji = (s) => s >= 90 ? ':green_circle:' : s >= 50 ? ':yellow_circle:' : ':red_circle:';
+            const perf = score('performance');
+            const a11y = score('accessibility');
+            const bp = score('best-practices');
+            const seo = score('seo');
+            const body = [
+              '## :lighthouse: Lighthouse Report',
+              '',
+              '| Category | Score | Status |',
+              '|----------|-------|--------|',
+              `| Performance    | ${perf}  | ${emoji(perf)} |`,
+              `| Accessibility  | ${a11y}  | ${emoji(a11y)} |`,
+              `| Best Practices | ${bp}    | ${emoji(bp)} |`,
+              `| SEO            | ${seo}   | ${emoji(seo)} |`,
+              '',
+              '<details><summary>Core Web Vitals</summary>',
+              '',
+              `- **FCP**: ${results.audits['first-contentful-paint']?.displayValue ?? 'N/A'}`,
+              `- **LCP**: ${results.audits['largest-contentful-paint']?.displayValue ?? 'N/A'}`,
+              `- **TBT**: ${results.audits['total-blocking-time']?.displayValue ?? 'N/A'}`,
+              `- **CLS**: ${results.audits['cumulative-layout-shift']?.displayValue ?? 'N/A'}`,
+              `- **Speed Index**: ${results.audits['speed-index']?.displayValue ?? 'N/A'}`,
+              '',
+              '</details>',
+            ].join('\n');
+            const { data: comments } = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+            });
+            const existing = comments.find(c => c.body.includes(':lighthouse: Lighthouse Report'));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                comment_id: existing.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body,
+              });
+            }

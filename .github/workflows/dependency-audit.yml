@@ -1,0 +1,163 @@
+name: Dependency Audit
+
+on:
+  schedule:
+    - cron: "0 7 * * 1" # Every Monday at 7am UTC
+  push:
+    branches: [main]
+    paths:
+      - "package.json"
+      - "package-lock.json"
+  pull_request:
+    branches: [main]
+    paths:
+      - "package.json"
+      - "package-lock.json"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  audit:
+    name: npm audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline
+
+      - name: Run npm audit (moderate+)
+        id: audit
+        run: |
+          npm audit --audit-level=moderate --json > audit-report.json 2>&1 || true
+          VULN_COUNT=$(cat audit-report.json | jq '.metadata.vulnerabilities | (.moderate // 0) + (.high // 0) + (.critical // 0)')
+          echo "vuln_count=$VULN_COUNT" >> $GITHUB_OUTPUT
+          echo "### npm Audit Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          npm audit --audit-level=moderate 2>&1 | tail -20 >> $GITHUB_STEP_SUMMARY || true
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report
+          path: audit-report.json
+          retention-days: 30
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request' && steps.audit.outputs.vuln_count != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('audit-report.json', 'utf8'));
+            const v = report.metadata?.vulnerabilities || {};
+            const body = [
+              '## :shield: npm Audit Report',
+              '',
+              '| Severity | Count |',
+              '|----------|-------|',
+              `| Critical | ${v.critical || 0} |`,
+              `| High     | ${v.high || 0} |`,
+              `| Moderate | ${v.moderate || 0} |`,
+              `| Low      | ${v.low || 0} |`,
+              '',
+              'Run `npm audit fix` locally to resolve auto-fixable issues.',
+            ].join('\n');
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body,
+            });
+
+      - name: Fail on critical/high
+        run: npm audit --audit-level=high
+
+  outdated:
+    name: Check outdated packages
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --prefer-offline
+
+      - name: Check for outdated packages
+        id: outdated
+        run: |
+          OUTPUT=$(npm outdated --json 2>/dev/null || echo '{}')
+          echo "$OUTPUT" > outdated-report.json
+          COUNT=$(echo "$OUTPUT" | jq 'keys | length')
+          echo "outdated_count=$COUNT" >> $GITHUB_OUTPUT
+          echo "### Outdated Packages ($COUNT)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          npm outdated 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+
+      - name: Upload outdated report
+        uses: actions/upload-artifact@v4
+        with:
+          name: outdated-packages-report
+          path: outdated-report.json
+          retention-days: 30
+
+      - name: Open issue if packages are outdated
+        if: steps.outdated.outputs.outdated_count != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const report = JSON.parse(fs.readFileSync('outdated-report.json', 'utf8'));
+            const rows = Object.entries(report).map(([pkg, info]) =>
+              `| \`${pkg}\` | ${info.current} | ${info.wanted} | ${info.latest} |`
+            ).join('\n');
+            const body = [
+              '## :package: Outdated Dependency Report',
+              `_Generated ${new Date().toISOString().split('T')[0]}_`,
+              '',
+              '| Package | Current | Wanted | Latest |',
+              '|---------|---------|--------|--------|',
+              rows,
+              '',
+              'Dependabot will handle these automatically. This issue is for visibility.',
+            ].join('\n');
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              labels: ['outdated-deps'],
+              state: 'open',
+            });
+            if (issues.length > 0) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues[0].number,
+                body,
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: ':package: Outdated dependencies detected',
+                body,
+                labels: ['outdated-deps', 'dependencies'],
+              });
+            }

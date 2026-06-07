@@ -39,13 +39,16 @@ export async function GET() {
       );
     }
 
+    const currentYear = new Date().getFullYear();
+    const acceptedYears = [String(currentYear), String(currentYear - 1)];
+
     const filteredPdfs = data
       .filter(
         (pdf) =>
           typeof pdf?.title === "string" &&
           /value\s?chain/i.test(pdf.title) &&
           typeof pdf?.date === "string" &&
-          pdf.date.startsWith("2025") &&
+          acceptedYears.some((y) => pdf.date.startsWith(y)) &&
           typeof pdf?.url === "string"
       )
       .sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -54,7 +57,7 @@ export async function GET() {
       {
         count: filteredPdfs.length,
         pdfs: filteredPdfs,
-        cachedAt: new Date().toISOString(),
+        builtAt: new Date().toISOString(),
       },
       {
         headers: {

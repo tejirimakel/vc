@@ -1,22 +1,28 @@
-const PAGES_CACHE   = 'pages-cache-v1';
-const API_CACHE     = 'api-cache-v1';
-const IMAGE_CACHE   = 'image-cache-v1';
-const PDF_CACHE     = 'pdf-cache-v1';
-const VIDEO_CACHE   = 'video-cache-v1';
-const OFFLINE_CACHE = 'offline-cache-v1';
+const PAGES_CACHE   = 'pages-cache-v2';
+const API_CACHE     = 'api-cache-v2';
+const IMAGE_CACHE   = 'image-cache-v2';
+const PDF_CACHE     = 'pdf-cache-v2';
+const OFFLINE_CACHE = 'offline-cache-v2';
 const OFFLINE_URL   = '/offline';
 
-const ALL_CACHES = [PAGES_CACHE, API_CACHE, IMAGE_CACHE, PDF_CACHE, VIDEO_CACHE, OFFLINE_CACHE];
+const ALL_CACHES = [PAGES_CACHE, API_CACHE, IMAGE_CACHE, PDF_CACHE, OFFLINE_CACHE];
+const PROTECTED_PAGE_PREFIXES = ['/mobile', '/news', '/ecopy', '/video', '/stream'];
+const PROTECTED_API_PREFIXES = ['/api/news', '/api/ecopy', '/api/pdf', '/api/stream', '/api/youtube'];
 
-// ── Install: precache offline fallback and main app shell ──────────────────
+function pathStartsWith(pathname, prefixes) {
+  return prefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+}
+
+// ── Install: precache offline fallback ────────────────────────────────────
 self.addEventListener('install', (event) => {
-  self.skipWaiting();
   event.waitUntil(
-    caches.open(OFFLINE_CACHE).then((cache) => cache.addAll([OFFLINE_URL, '/mobile']))
+    caches.open(OFFLINE_CACHE).then((cache) => cache.addAll([OFFLINE_URL]))
   );
+  // Do NOT call skipWaiting() here — let the new SW wait for the page to reload
+  // so we don't break inflight requests. swRegister.js handles the prompt.
 });
 
-// ── Activate: claim all clients and remove stale caches ───────────────────
+// ── Activate: claim clients and remove stale caches ───────────────────────
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     Promise.all([
@@ -26,6 +32,11 @@ self.addEventListener('activate', (event) => {
       ),
     ])
   );
+});
+
+// ── Message: allow clients to trigger skipWaiting ────────────────────────
+self.addEventListener('message', (event) => {
+  if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });
 
 // ── Helpers ───────────────────────────────────────────────────────────────
@@ -85,25 +96,43 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
 
   const url = new URL(request.url);
+  const isProtectedPage = pathStartsWith(url.pathname, PROTECTED_PAGE_PREFIXES);
+  const isProtectedApi = pathStartsWith(url.pathname, PROTECTED_API_PREFIXES);
 
   // Navigation requests → NetworkFirst with 5s timeout
   if (request.mode === 'navigate') {
+    if (isProtectedPage) {
+      event.respondWith(fetch(request).catch(() => caches.match(OFFLINE_URL)));
+      return;
+    }
     event.respondWith(networkFirst(request, PAGES_CACHE, 5));
     return;
   }
 
-  // WordPress API → NetworkFirst with 8s timeout
+  if (isProtectedApi) {
+    event.respondWith(fetch(request));
+    return;
+  }
+
+  // Own API routes (/api/news, /api/youtube, /api/ecopy, /api/stream)
+  // StaleWhileRevalidate: serve cached content instantly, refresh in background
+  if (url.pathname.startsWith('/api/') && !url.pathname.startsWith('/api/pdf')) {
+    event.respondWith(staleWhileRevalidate(request, API_CACHE));
+    return;
+  }
+
+  // PDF proxy → CacheFirst (PDFs rarely change at the same URL)
+  if (url.pathname.startsWith('/api/pdf')) {
+    event.respondWith(cacheFirst(request, PDF_CACHE));
+    return;
+  }
+
+  // WordPress API direct calls → NetworkFirst with 8s timeout
   if (
     url.origin === 'https://thevaluechainng.com' &&
     url.pathname.startsWith('/wp-json/')
   ) {
     event.respondWith(networkFirst(request, API_CACHE, 8));
-    return;
-  }
-
-  // PDF proxy → CacheFirst
-  if (url.pathname.startsWith('/api/pdf')) {
-    event.respondWith(cacheFirst(request, PDF_CACHE));
     return;
   }
 
@@ -113,12 +142,12 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // YouTube / Google Video → StaleWhileRevalidate
+  // YouTube thumbnails only (not video streams — those can't be cached)
   if (
-    url.origin.includes('youtube.com') ||
-    url.origin.includes('googlevideo.com')
+    url.origin.includes('img.youtube.com') ||
+    url.origin.includes('i.ytimg.com')
   ) {
-    event.respondWith(staleWhileRevalidate(request, VIDEO_CACHE));
+    event.respondWith(cacheFirst(request, IMAGE_CACHE));
     return;
   }
 });

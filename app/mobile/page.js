@@ -2,16 +2,82 @@
 
 import Navbar from "@/components/nav";
 import SplashScreen from "@/components/splash";
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { MdOutlineFeed } from "react-icons/md";
-import { IoMdSearch } from "react-icons/io";
+import {
+  IoAlertCircleOutline,
+  IoChevronForward,
+  IoNewspaperOutline,
+  IoReloadOutline,
+  IoSearchOutline,
+  IoTimeOutline,
+} from "react-icons/io5";
 import SearchOverlay from "@/components/searchOverlay";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import "swiper/css";
 import ProtectedRoutes from "@/components/protectedRoutes";
+import { decode } from "he";
+
+const cleanText = (value = "") =>
+  decode(String(value))
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+const makeExcerpt = (value) => {
+  const text = cleanText(value);
+  if (!text) return "Open the full story.";
+  const words = text.split(" ");
+  return words.slice(0, 16).join(" ") + (words.length > 16 ? "..." : "");
+};
+
+const cutTitle = (value, limit = 14) => {
+  const text = cleanText(value);
+  const words = text.split(" ");
+  return words.slice(0, limit).join(" ") + (words.length > limit ? "..." : "");
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return "Latest";
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return "Latest";
+  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(date);
+};
+
+function FeedSkeleton() {
+  return (
+    <div className="mx-auto min-h-screen max-w-3xl px-4 pb-28 pt-20 animate-pulse">
+      <div className="mb-5 flex items-center justify-between">
+        <div>
+          <div className="h-4 w-28 rounded bg-neutral-200 dark:bg-neutral-800" />
+          <div className="mt-2 h-7 w-44 rounded bg-neutral-200 dark:bg-neutral-800" />
+        </div>
+        <div className="h-11 w-11 rounded-full bg-neutral-200 dark:bg-neutral-800" />
+      </div>
+      <div className="h-[25rem] rounded-lg bg-neutral-200 dark:bg-neutral-800" />
+      <div className="mt-6 flex gap-2 overflow-hidden">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="h-10 min-w-28 rounded-full bg-neutral-200 dark:bg-neutral-800" />
+        ))}
+      </div>
+      <div className="mt-6 space-y-3">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="flex gap-3 rounded-lg border border-black/5 bg-white p-3 shadow-sm dark:border-white/10 dark:bg-white/5">
+            <div className="h-28 w-28 shrink-0 rounded-lg bg-neutral-200 dark:bg-neutral-800" />
+            <div className="flex-1 space-y-3 pt-1">
+              <div className="h-4 w-full rounded bg-neutral-200 dark:bg-neutral-800" />
+              <div className="h-4 w-4/5 rounded bg-neutral-200 dark:bg-neutral-800" />
+              <div className="h-3 w-24 rounded bg-neutral-200 dark:bg-neutral-800" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function MobileHome() {
   const [newsFeed, setNewsFeed] = useState([]);
@@ -26,12 +92,15 @@ export default function MobileHome() {
 
   useEffect(() => {
     async function fetchData() {
+      setLoading(true);
+      setError(null);
+
       try {
         const response = await fetch("/api/news");
         if (!response.ok) throw new Error("Failed to fetch news");
         const data = await response.json();
         setNewsFeed(data.newsFeed ?? []);
-        setCategories(["All", ...(data.categories ?? []).filter((c) => c !== "All")]);
+        setCategories(["All", ...(data.categories ?? []).filter((category) => category !== "All")]);
         setTrendingNews(data.trendingNews ?? []);
       } catch (err) {
         setError(err.message);
@@ -39,181 +108,212 @@ export default function MobileHome() {
         setLoading(false);
       }
     }
+
     fetchData();
   }, [retryCount]);
 
-  const generateNewsExcerpt = (p) =>
-    p?.trim().split(" ").slice(0, 4).join(" ") + "...";
+  const featuredNews = useMemo(
+    () => (trendingNews.length ? trendingNews : newsFeed.slice(0, 3)),
+    [newsFeed, trendingNews]
+  );
 
-  const cutTitle = (t) => {
-    if (!t) return "";
-    const words = t.trim().split(" ");
-    return words.slice(0, 14).join(" ") + (words.length > 14 ? "." : "");
-  };
+  const filteredNews = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase();
 
-  const filteredNews = newsFeed
-    .filter((post) => {
-      const categoryMatch =
-        selectedCategory === "All" || post.categories.includes(selectedCategory);
-      const searchMatch =
-        searchQuery === "" ||
-        post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        post.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
-      return categoryMatch && searchMatch;
-    })
-    .slice(0, 10);
+    return newsFeed
+      .filter((post) => {
+        const postCategories = Array.isArray(post.categories) ? post.categories : [];
+        const categoryMatch =
+          selectedCategory === "All" || postCategories.includes(selectedCategory);
+        const searchBody = `${cleanText(post.title)} ${cleanText(post.excerpt)}`.toLowerCase();
+        const searchMatch = !normalizedQuery || searchBody.includes(normalizedQuery);
+        return categoryMatch && searchMatch;
+      })
+      .slice(0, 10);
+  }, [newsFeed, searchQuery, selectedCategory]);
 
-  const showSkeleton = loading;
+  const handleRetry = () => setRetryCount((count) => count + 1);
 
   return (
     <ProtectedRoutes>
-      {/* Splash overlay — self-managing, renders on top */}
       <SplashScreen />
 
-      <div className="h-auto bg-inherit">
-        {/* Data skeleton while news loads */}
-        {showSkeleton && (
-          <div className="container mx-auto pt-12 pb-20 animate-pulse">
-            <div className="w-full h-[300px] rounded-lg bg-neutral-200 dark:bg-neutral-800" />
-            <div className="mt-6 flex space-x-3">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-8 w-20 rounded-full bg-neutral-200 dark:bg-neutral-800" />
-              ))}
-            </div>
-            <div className="mt-6 space-y-4">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="flex p-4 bg-white dark:bg-neutral-900 rounded-lg shadow-sm gap-4">
-                  <div className="min-w-[120px] w-[120px] h-[120px] rounded-lg bg-neutral-200 dark:bg-neutral-800 flex-shrink-0" />
-                  <div className="flex-1 space-y-2 pt-1">
-                    <div className="h-4 bg-neutral-200 dark:bg-neutral-800 rounded w-full" />
-                    <div className="h-4 bg-neutral-200 dark:bg-neutral-800 rounded w-3/4" />
-                    <div className="h-3 bg-neutral-200 dark:bg-neutral-800 rounded w-1/4 mt-2" />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+      <div className="min-h-screen bg-[#f5f7fb] text-neutral-950 dark:bg-[#07080c] dark:text-neutral-50">
+        {loading && <FeedSkeleton />}
 
-        {/* Error state */}
         {!loading && error && (
-          <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center">
-            <p className="text-neutral-500 dark:text-neutral-400 text-sm mb-4">
-              Could not load news. Check your connection.
+          <div className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-6 pb-24 text-center">
+            <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300">
+              <IoAlertCircleOutline className="h-9 w-9" aria-hidden="true" />
+            </div>
+            <h1 className="mt-5 text-2xl font-black">News did not load</h1>
+            <p className="mt-2 text-sm leading-6 text-neutral-600 dark:text-neutral-300">
+              Check your connection and try again. Saved pages may still be available offline.
             </p>
             <button
-              onClick={() => { setError(null); setLoading(true); setRetryCount((c) => c + 1); }}
-              className="px-6 py-2 bg-red-700 text-white text-sm font-semibold rounded-full hover:bg-red-600"
+              onClick={handleRetry}
+              className="mt-6 inline-flex h-12 items-center justify-center gap-2 rounded-full bg-red-700 px-6 text-sm font-bold text-white shadow-lg shadow-red-700/20 transition-colors hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-700/35"
             >
+              <IoReloadOutline className="h-5 w-5" aria-hidden="true" />
               Retry
             </button>
           </div>
         )}
 
-        {/* Content */}
-        {!showSkeleton && !error && (
+        {!loading && !error && (
           <>
-            <nav className="fixed top-0 left-0 w-full z-50 bg-neutral-50/50 dark:bg-neutral-950/50 px-2 backdrop-blur-md shadow-sm">
-              <div className="flex justify-between items-center p-4">
-                <Image
-                  src="/VC-2023.jpg"
-                  alt="Valuechain Oil & Gas"
-                  width={100}
-                  height={40}
-                  quality={85}
-                  className="h-auto"
-                />
+            <nav className="fixed left-0 top-0 z-50 w-full border-b border-black/10 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-[#090b10]/90">
+              <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <Image
+                    src="/VC-2023.jpg"
+                    alt="Valuechain Oil & Gas"
+                    width={112}
+                    height={32}
+                    quality={85}
+                    className="h-auto max-w-[7rem] rounded bg-white object-contain p-1"
+                    priority
+                  />
+                  <span className="hidden rounded-full bg-red-50 px-3 py-1 text-xs font-bold text-red-700 dark:bg-red-500/10 dark:text-red-300 sm:inline-flex">
+                    Live brief
+                  </span>
+                </div>
                 <button
                   onClick={() => setSearchOpen(true)}
-                  className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-800"
+                  className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-black/10 bg-white text-neutral-800 shadow-sm transition-colors hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-red-700/25 dark:border-white/10 dark:bg-white/10 dark:text-neutral-100 dark:hover:bg-white/15"
                   aria-label="Search"
                 >
-                  <IoMdSearch className="w-5 h-5 text-neutral-800 dark:text-neutral-200" />
+                  <IoSearchOutline className="h-5 w-5" aria-hidden="true" />
                 </button>
               </div>
             </nav>
 
-            <div className="container mx-auto pt-12 pb-20">
-              <Swiper
-                slidesPerView={1}
-                spaceBetween={10}
-                autoplay={{ delay: 3000, disableOnInteraction: false }}
-                modules={[Autoplay]}
-                speed={3800}
-                draggable
-              >
-                {trendingNews.map((news, index) => (
-                  <SwiperSlide key={news.id}>
-                    <Link href={`/news/${news.id}`}>
-                      <div className="relative rounded-lg overflow-hidden shadow-md">
-                        <Image
-                          className="w-full h-[300px] object-cover"
-                          src={news.image || "/VC-2023.jpg"}
-                          alt={news.title}
-                          width={800}
-                          height={300}
-                          quality={85}
-                          priority={index === 0}
-                          sizes="100vw"
-                        />
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white p-3">
-                          <h2 className="text-xl font-semibold">{news.title}</h2>
-                        </div>
-                      </div>
-                    </Link>
-                  </SwiperSlide>
-                ))}
-              </Swiper>
+            <main className="mx-auto max-w-3xl px-4 pb-28 pt-20">
+              <div className="mb-5">
+                <p className="text-sm font-bold uppercase text-red-700 dark:text-red-300">
+                  Today&apos;s briefing
+                </p>
+                <h1 className="mt-1 text-3xl font-black">Energy headlines</h1>
+              </div>
 
-              {/* Category filter */}
-              <div className="mt-6">
-                <div className="mt-3 flex overflow-x-auto space-x-3 no-scrollbar">
-                  {categories.map((category) => (
+              {featuredNews.length > 0 && (
+                <Swiper
+                  slidesPerView={1}
+                  spaceBetween={12}
+                  autoplay={{ delay: 4200, disableOnInteraction: false }}
+                  modules={[Autoplay]}
+                  speed={650}
+                  grabCursor
+                  className="overflow-hidden rounded-lg"
+                >
+                  {featuredNews.map((news, index) => (
+                    <SwiperSlide key={news.id ?? news.title}>
+                      <Link href={`/news/${news.id}`} className="block">
+                        <article className="relative min-h-[25rem] overflow-hidden rounded-lg bg-neutral-900">
+                          <Image
+                            className="absolute inset-0 h-full w-full object-cover"
+                            src={news.image || "/VC-2023.jpg"}
+                            alt={cleanText(news.title) || "Featured news"}
+                            width={900}
+                            height={620}
+                            quality={85}
+                            priority={index === 0}
+                            sizes="(min-width: 768px) 768px, 100vw"
+                          />
+                          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.04)_0%,rgba(0,0,0,0.82)_84%)]" />
+                          <div className="absolute inset-x-0 bottom-0 p-5 text-white">
+                            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-bold backdrop-blur">
+                              <IoNewspaperOutline className="h-4 w-4" aria-hidden="true" />
+                              Featured
+                            </div>
+                            <h2 className="text-2xl font-black leading-tight">
+                              {cutTitle(news.title, 13)}
+                            </h2>
+                            <p className="mt-3 text-sm leading-6 text-neutral-200">
+                              {makeExcerpt(news.excerpt)}
+                            </p>
+                          </div>
+                        </article>
+                      </Link>
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              )}
+
+              <div className="mt-6 flex gap-2 overflow-x-auto pb-1 no-scrollbar" aria-label="News categories">
+                {categories.map((category) => {
+                  const isActive = selectedCategory === category;
+                  return (
                     <button
                       key={category}
                       onClick={() => setSelectedCategory(category)}
-                      className={`flex items-center text-sm px-8 py-2 rounded-full border border-gray-300 dark:border-neutral-500 whitespace-nowrap ${
-                        selectedCategory === category
-                          ? "bg-red-700 border-none text-white"
-                          : "bg-gray-100 dark:bg-neutral-400 hover:bg-gray-200 dark:hover:bg-neutral-600"
+                      className={`inline-flex h-10 shrink-0 items-center gap-2 rounded-full border px-4 text-sm font-bold transition-colors ${
+                        isActive
+                          ? "border-red-700 bg-red-700 text-white shadow-sm shadow-red-700/20"
+                          : "border-black/10 bg-white text-neutral-700 hover:bg-neutral-100 dark:border-white/10 dark:bg-white/5 dark:text-neutral-200 dark:hover:bg-white/10"
                       }`}
                     >
-                      <MdOutlineFeed className="mr-2 text-md" />
+                      <MdOutlineFeed className="h-4 w-4" aria-hidden="true" />
                       {category.split(" ")[0]}
                     </button>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
 
-              {/* News list */}
-              <h2 className="text-xl dark:text-neutral-200 font-bold mt-6">Latest News</h2>
-              <ul className="mt-3 space-y-4">
+              <div className="mt-6 flex items-end justify-between gap-4">
+                <div>
+                  <h2 className="text-xl font-black">Latest News</h2>
+                  <p className="mt-1 text-xs font-medium text-neutral-500 dark:text-neutral-400">
+                    {filteredNews.length} stories available
+                  </p>
+                </div>
+                <Link
+                  href="/news"
+                  className="inline-flex items-center gap-1 text-sm font-bold text-red-700 dark:text-red-300"
+                >
+                  View all
+                  <IoChevronForward className="h-4 w-4" aria-hidden="true" />
+                </Link>
+              </div>
+
+              <ul className="mt-3 space-y-3">
                 {filteredNews.length > 0 ? (
                   filteredNews.map((news) => (
-                    <li key={news.id} className="flex p-4 bg-white shadow-sm rounded-lg dark:bg-neutral-950">
-                      <Image
-                        className="min-w-[120px] w-[120px] h-[120px] object-cover rounded-lg flex-shrink-0"
-                        src={news.image || "/VC-2023.jpg"}
-                        alt={news.title}
-                        width={120}
-                        height={120}
-                        sizes="120px"
-                      />
-                      <Link href={`/news/${news.id}`} className="ml-4 flex flex-col space-y-1 min-w-0">
-                        <h3 className="dark:text-neutral-300 text-sm leading-5 font-semibold">
-                          {cutTitle(news.title)}
-                        </h3>
-                        <p className="text-sm text-gray-600 dark:text-neutral-400">
-                          {generateNewsExcerpt(news.excerpt)}
-                        </p>
+                    <li key={news.id ?? news.title}>
+                      <Link
+                        href={`/news/${news.id}`}
+                        className="flex min-h-32 gap-3 rounded-lg border border-black/10 bg-white p-3 shadow-sm transition-colors hover:border-red-700/30 dark:border-white/10 dark:bg-white/5 dark:hover:border-red-300/40"
+                      >
+                        <Image
+                          className="h-28 w-28 shrink-0 rounded-lg object-cover"
+                          src={news.image || "/VC-2023.jpg"}
+                          alt={cleanText(news.title) || "News image"}
+                          width={128}
+                          height={128}
+                          sizes="128px"
+                        />
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-sm font-bold leading-5 text-neutral-950 dark:text-neutral-100">
+                            {cutTitle(news.title)}
+                          </h3>
+                          <p className="mt-2 text-xs leading-5 text-neutral-600 dark:text-neutral-300">
+                            {makeExcerpt(news.excerpt)}
+                          </p>
+                          <p className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-neutral-500 dark:text-neutral-400">
+                            <IoTimeOutline className="h-4 w-4" aria-hidden="true" />
+                            {formatDate(news.date)}
+                          </p>
+                        </div>
                       </Link>
                     </li>
                   ))
                 ) : (
-                  <p className="text-gray-500">No news available in this category.</p>
+                  <li className="rounded-lg border border-dashed border-black/15 bg-white/60 px-4 py-8 text-center text-sm text-neutral-500 dark:border-white/15 dark:bg-white/5 dark:text-neutral-400">
+                    No news available for this filter.
+                  </li>
                 )}
               </ul>
-            </div>
+            </main>
           </>
         )}
 

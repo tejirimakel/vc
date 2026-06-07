@@ -1,11 +1,12 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Document, Page, pdfjs } from 'react-pdf'
+import { Document, Page } from 'react-pdf'
 import 'react-pdf/dist/Page/TextLayer.css'
 import 'react-pdf/dist/Page/AnnotationLayer.css'
+import { configurePdfWorker } from '@/lib/pdfConfig'
 
-pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.js'
+configurePdfWorker()
 
 export default function PdfViewerComponent({ pdfUrl }) {
   const [blobUrl, setBlobUrl] = useState(null)
@@ -14,11 +15,14 @@ export default function PdfViewerComponent({ pdfUrl }) {
   const containerRef = useRef(null)
 
   useEffect(() => {
-    if (!containerRef.current) return
-    const resize = () => setContainerWidth(containerRef.current.offsetWidth)
-    resize()
-    window.addEventListener('resize', resize)
-    return () => window.removeEventListener('resize', resize)
+    const el = containerRef.current
+    if (!el) return
+
+    const observer = new ResizeObserver(([entry]) => {
+      setContainerWidth(entry.contentRect.width)
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
   }, [])
 
   useEffect(() => {
@@ -52,7 +56,7 @@ export default function PdfViewerComponent({ pdfUrl }) {
   }, [pdfUrl])
 
   if (!pdfUrl) return <p>No PDF available</p>
-  if (error) return <p className="text-red-600">❌ {error}</p>
+  if (error) return <p className="text-red-600" role="alert">{error}</p>
   if (!blobUrl) return <p>Loading PDF…</p>
 
   return (
