@@ -1,6 +1,8 @@
 name: Lighthouse CI
 
 on:
+  schedule:
+    - cron: "0 6 * * 3" # Every Wednesday at 6am UTC
   pull_request:
     branches: [main]
   push:
