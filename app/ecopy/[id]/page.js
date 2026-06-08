@@ -22,6 +22,7 @@ export default function EcopyDetailPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const containerRef = useRef(null);
+  const touchStartX = useRef(null);
 
   const url = searchParams.get("url");
   const title = searchParams.get("title") || "PDF Document";
@@ -49,6 +50,16 @@ export default function EcopyDetailPage() {
   const goPrevious = () => setPageNumber((page) => Math.max(page - 1, 1));
   const goNext = () => setPageNumber((page) => Math.min(page + 1, numPages || page));
 
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  const handleTouchEnd = (e) => {
+    if (touchStartX.current === null) return;
+    const delta = touchStartX.current - e.changedTouches[0].clientX;
+    if (Math.abs(delta) > 50) delta > 0 ? goNext() : goPrevious();
+    touchStartX.current = null;
+  };
+
   if (!url) {
     return (
       <div className="min-h-screen bg-[#f5f7fb] text-neutral-950 dark:bg-[#07080c] dark:text-neutral-50">
@@ -67,7 +78,7 @@ export default function EcopyDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f7fb] text-neutral-950 dark:bg-[#07080c] dark:text-neutral-50" ref={containerRef}>
+    <div className="min-h-screen bg-[#f5f7fb] text-neutral-950 dark:bg-[#07080c] dark:text-neutral-50">
       <nav className="fixed left-0 top-0 z-50 w-full border-b border-black/10 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-[#090b10]/90">
         <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-3">
           <button
@@ -124,7 +135,12 @@ export default function EcopyDetailPage() {
             </div>
           </div>
 
-          <div className="mt-4 overflow-x-auto rounded-lg bg-neutral-100 p-2 dark:bg-black/30">
+          <div
+            ref={containerRef}
+            className="mt-4 overflow-hidden rounded-lg bg-neutral-100 p-2 dark:bg-black/30"
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+          >
             <Document
               file={proxiedUrl}
               onLoadSuccess={({ numPages: pages }) => {
@@ -165,15 +181,7 @@ export default function EcopyDetailPage() {
           </p>
         )}
 
-        <a
-          href={proxiedUrl || "#"}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-full border border-black/10 bg-white px-5 text-sm font-bold text-neutral-800 shadow-sm transition-colors hover:bg-neutral-100 dark:border-white/10 dark:bg-white/10 dark:text-neutral-100 dark:hover:bg-white/15"
-        >
-          <IoOpenOutline className="h-5 w-5" aria-hidden="true" />
-          Open PDF in browser
-        </a>
+
       </main>
 
       <Navbar />
