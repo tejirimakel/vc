@@ -190,7 +190,7 @@ This project is a Next.js App Router PWA for TheValueChain news, videos, live st
 
 [Certain] Lines 1-5 define the access cookie name, 30-day lifetime, token version, and clock-skew tolerance.
 
-[Certain] Lines 7-18 pick a signing secret from `PWA_ACCESS_SECRET`, `APP_ACCESS_SECRET`, or `REVALIDATION_SECRET`, with a development fallback only outside production.
+[Certain] Lines 7-18 pick a signing secret from `PWA_ACCESS_SECRET`, `APP_ACCESS_SECRET`, or `REVALIDATION_SECRET`, with a development fallback only outside production. Production installs must define `PWA_ACCESS_SECRET`; otherwise the home-screen launch page cannot mint the protected-route cookie and will stop on the launch screen.
 
 [Certain] Lines 20-26 base64url-encode signature bytes.
 
@@ -202,7 +202,7 @@ This project is a Next.js App Router PWA for TheValueChain news, videos, live st
 
 [Certain] Lines 59-78 validate token shape, expiry, clock skew, version, and signature.
 
-[Likely] Improvement: set a dedicated `PWA_ACCESS_SECRET` in production instead of sharing `REVALIDATION_SECRET`.
+[Certain] Required production setup: set a dedicated `PWA_ACCESS_SECRET` in the deployment environment instead of sharing `REVALIDATION_SECRET`.
 
 ## Components
 
