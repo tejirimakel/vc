@@ -9,13 +9,17 @@ import { isInstalledPwa } from "@/lib/pwaDisplayMode";
 export default function PwaLaunchPage() {
   const router = useRouter();
   const retryTimer = useRef(null);
-  const [failed, setFailed] = useState(false);
+  const attempts = useRef(0);
+  const [failureMessage, setFailureMessage] = useState("");
+  const [retrying, setRetrying] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
 
     async function launch() {
-      setFailed(false);
+      attempts.current += 1;
+      setRetrying(true);
+      setFailureMessage("");
 
       if (!isInstalledPwa()) {
         router.replace("/");
@@ -26,15 +30,35 @@ export default function PwaLaunchPage() {
         const response = await fetch("/api/pwa/access", {
           method: "POST",
           headers: { "x-tvc-pwa-launch": "standalone" },
+          credentials: "include",
+          cache: "no-store",
         });
 
-        if (!response.ok) throw new Error("PWA access failed");
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.error || `PWA access failed with ${response.status}`);
+        }
+
         if (!cancelled) router.replace("/mobile");
       } catch (error) {
         console.error("PWA launch failed:", error);
         if (!cancelled) {
-          setFailed(true);
-          retryTimer.current = setTimeout(launch, 2500);
+          const message = error.message || "PWA access failed";
+          const permanentFailure =
+            message === "PWA access secret is not configured" ||
+            message === "Unauthorized";
+          const shouldRetry = !permanentFailure && attempts.current < 3;
+
+          setFailureMessage(
+            message === "PWA access secret is not configured"
+              ? "App access is not configured on this deployment."
+              : "Unable to restore app access."
+          );
+          setRetrying(shouldRetry);
+
+          if (shouldRetry) {
+            retryTimer.current = setTimeout(launch, 2500);
+          }
         }
       }
     }
@@ -58,13 +82,13 @@ export default function PwaLaunchPage() {
           priority
           className="h-auto rounded-lg bg-white p-2"
         />
-        <div className="mt-8 flex h-12 items-center justify-center gap-3 text-sm font-bold text-neutral-200">
-          <IoReloadOutline className="h-5 w-5 animate-spin text-red-300" aria-hidden="true" />
-          Opening app...
+        <div className="mt-8 flex min-h-12 items-center justify-center gap-3 text-sm font-bold text-neutral-200">
+          <IoReloadOutline className={`h-5 w-5 text-red-300 ${retrying ? "animate-spin" : ""}`} aria-hidden="true" />
+          {retrying ? "Opening app..." : "Could not open app"}
         </div>
-        {failed && (
+        {failureMessage && (
           <p className="mt-4 text-sm leading-6 text-neutral-400">
-            Still opening. Keep this screen active while access is restored.
+            {failureMessage}
           </p>
         )}
       </section>
