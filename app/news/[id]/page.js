@@ -206,7 +206,7 @@ export default function NewsArticle() {
             />
           </div>
 
-          <div className="mt-8 rounded-lg border border-black/10 bg-white p-5 shadow-sm dark:border-white/10 dark:bg-white/5 sm:p-7">
+          <div className="mt-1 p-2 shadow-sm sm:p-3">
             {paragraphs.length > 0 ? (
               <div className="space-y-5 text-base leading-8 text-neutral-800 dark:text-neutral-200">
                 {paragraphs.map((paragraph, index) => (
@@ -219,14 +219,6 @@ export default function NewsArticle() {
               </p>
             )}
           </div>
-
-          <Link
-            href="/news"
-            className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-full border border-black/10 bg-white px-5 text-sm font-bold text-neutral-800 shadow-sm transition-colors hover:bg-neutral-100 dark:border-white/10 dark:bg-white/10 dark:text-neutral-100 dark:hover:bg-white/15"
-          >
-            <IoChevronBack className="h-5 w-5" aria-hidden="true" />
-            Back to news
-          </Link>
         </article>
 
         <Navbar />

@@ -27,7 +27,7 @@ export default function Navbar() {
               href={item.link}
               className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-lg text-[11px] font-semibold transition-colors ${
                 isActive
-                  ? "bg-red-700 text-white shadow-sm shadow-red-700/20"
+                  ? " text-red-700 shadow-sm shadow-red-700/20"
                   : "text-neutral-500 hover:bg-neutral-100 hover:text-neutral-950 dark:text-neutral-400 dark:hover:bg-white/10 dark:hover:text-white"
               }`}
               aria-label={item.name}

@@ -31,7 +31,7 @@ const makeExcerpt = (value) => {
   const text = cleanText(value);
   if (!text) return "Open the full story.";
   const words = text.split(" ");
-  return words.slice(0, 16).join(" ") + (words.length > 16 ? "..." : "");
+  return words.slice(0, 10).join(" ") + (words.length > 16 ? "..." : "");
 };
 
 const cutTitle = (value, limit = 14) => {
@@ -193,7 +193,7 @@ export default function MobileHome() {
                 <p className="text-sm font-bold uppercase text-red-700 dark:text-red-300">
                   Today&apos;s briefing
                 </p>
-                <h1 className="mt-1 text-3xl font-black">Energy headlines</h1>
+                <h1 className="mt-1 text-3xl font-black">News headlines</h1>
               </div>
 
               {featuredNews.length > 0 && (
