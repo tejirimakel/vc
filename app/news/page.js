@@ -31,7 +31,7 @@ const cutTitle = (value, limit = 16) => {
 const makeExcerpt = (value) => {
   const words = cleanText(value).split(' ').filter(Boolean);
   if (!words.length) return 'Read the full update from TheValueChain.';
-  return words.slice(0, 16).join(' ') + (words.length > 20 ? '...' : '');
+  return words.slice(0, 16).join(' ') + (words.length > 16 ? '...' : '');
 };
 
 const formatDate = (dateString) => {
