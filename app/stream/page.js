@@ -33,7 +33,16 @@ export default function StreamPage() {
     if (!streamUrl || !videoRef.current) return;
 
     const video = videoRef.current;
-    const isHls = streamUrl.includes('.m3u8');
+    // Detect HLS by the URL pathname, not a substring match — signed/query
+    // params (…/live.m3u8?token=…) and lookalikes shouldn't fool detection.
+    let isHls = false;
+    try {
+      isHls = new URL(streamUrl, window.location.href).pathname
+        .toLowerCase()
+        .endsWith('.m3u8');
+    } catch {
+      isHls = streamUrl.toLowerCase().includes('.m3u8');
+    }
 
     if (!isHls) {
       video.src = streamUrl;

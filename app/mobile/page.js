@@ -31,7 +31,7 @@ const makeExcerpt = (value) => {
   const text = cleanText(value);
   if (!text) return "Open the full story.";
   const words = text.split(" ");
-  return words.slice(0, 10).join(" ") + (words.length > 16 ? "..." : "");
+  return words.slice(0, 10).join(" ") + (words.length > 10 ? "..." : "");
 };
 
 const cutTitle = (value, limit = 14) => {
