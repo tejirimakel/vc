@@ -93,15 +93,12 @@ export async function GET(req) {
       .filter((post) => post.sticky || post.featured_media)
       .slice(0, 5);
 
-    return new Response(
-      JSON.stringify({
-        newsFeed: sorted.slice(0, 10),
-        trendingNews: trending.length ? trending : sorted.slice(0, 5),
-        categories,
-        lastUpdated: new Date().toISOString(),
-      }),
-      200
-    );
+    return jsonResponse({
+      newsFeed: sorted.slice(0, 10),
+      trendingNews: trending.length ? trending : sorted.slice(0, 5),
+      categories,
+      lastUpdated: new Date().toISOString(),
+    });
   } catch (err) {
     console.error('News API error:', err);
     return jsonResponse({ error: 'Failed to fetch news' }, 500);
