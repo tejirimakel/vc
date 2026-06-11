@@ -87,6 +87,14 @@ Phases are ordered by risk-adjusted value; each is independently shippable. Earl
 
 ---
 
+### ⚙️ CI / GitHub Actions (audited 2026-06-11, fixed in commit d7806ca)
+
+22. **`dependency-audit.yml` outdated job silently never works.** `OUTPUT=$(npm outdated --json … || echo '{}')` concatenates two JSON values when packages are outdated (npm prints JSON *and* exits 1), so `jq` returns a 2-line count and the `JSON.parse` in the issue-creation step throws → the outdated-deps issue is never opened. Reproduced and fixed (capture stdout to file directly).
+23. **`dependency-audit.yml` audit report corruption.** `npm audit --json > audit-report.json 2>&1` lets npm stderr warnings pollute the JSON → jq + the PR-comment `JSON.parse` can break. Changed to `2>/dev/null`.
+24. **`security.yml` CodeQL runs `autobuild` for JS/TS** — unnecessary (no compilation) and a failure source. Replaced with `build-mode: none`.
+25. **`security.yml` audit-summary redirect reversed** — `npm audit 2>&1 >> $SUMMARY` leaves stderr on the console; corrected to `>> $SUMMARY 2>&1`.
+26. **`lighthouse.yml` audited gated routes.** `.lighthouserc.js` listed `/news` and `/ecopy`, which `middleware.js` redirects to `/?access=required` for unauthenticated CI runs — Lighthouse scored the redirect target. Restricted to public routes (`/`, `/offline`). *Trade-off: protected content pages are no longer perf-audited in CI; revisit with a seeded access cookie if that coverage is wanted.*
+
 ## 4. Out of scope
 - Identity / accounts / real paywall (revisit only if subscriber-only content is introduced).
 - Backend/WordPress changes.
