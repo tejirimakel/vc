@@ -27,6 +27,8 @@ const nextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "thevaluechainng.com" },
       { protocol: "https", hostname: "www.thevaluechainng.com" },
+      { protocol: "https", hostname: "img.youtube.com" },
+      { protocol: "https", hostname: "i.ytimg.com" },
     ],
   },
   webpack(config) {
