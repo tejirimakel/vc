@@ -14,7 +14,6 @@ import {
 } from "react-icons/io5";
 import { BsFiletypePdf } from "react-icons/bs";
 import Link from "next/link";
-import ProtectedRoutes from "@/components/protectedRoutes";
 import { formatDate } from "@/lib/format";
 import { useFetch } from "@/lib/useFetch";
 
@@ -93,7 +92,7 @@ export default function PdfPage() {
   const displayedPdfs = filteredPdfs.slice(startIndex, startIndex + pdfsPerPage);
 
   return (
-    <ProtectedRoutes>
+    <>
       <div className="min-h-screen bg-[#f5f7fb] text-neutral-950 dark:bg-[#07080c] dark:text-neutral-50">
         <nav className="fixed left-0 top-0 z-50 w-full border-b border-black/10 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-[#090b10]/90">
           <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
@@ -205,6 +204,6 @@ export default function PdfPage() {
 
         <Navbar />
       </div>
-    </ProtectedRoutes>
+    </>
   );
 }

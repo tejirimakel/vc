@@ -13,7 +13,6 @@ import {
   IoNewspaperOutline,
   IoReloadOutline,
 } from 'react-icons/io5';
-import ProtectedRoute from '@/components/protectedRoutes';
 import { cleanText, getParagraphs } from '@/lib/text';
 import { formatDate } from '@/lib/format';
 
@@ -21,7 +20,7 @@ const DATE_OPTIONS = { year: 'numeric', month: 'long', day: 'numeric' };
 
 function ArticleSkeleton() {
   return (
-    <ProtectedRoute>
+    <>
       <div className="min-h-screen bg-[#f5f7fb] text-neutral-950 dark:bg-[#07080c] dark:text-neutral-50">
         <div className="fixed left-0 top-0 z-50 h-16 w-full border-b border-black/10 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-[#090b10]/90" />
         <main className="mx-auto max-w-3xl px-4 pb-28 pt-24 animate-pulse">
@@ -37,7 +36,7 @@ function ArticleSkeleton() {
         </main>
         <Navbar />
       </div>
-    </ProtectedRoute>
+    </>
   );
 }
 
@@ -103,7 +102,7 @@ export default function NewsArticle() {
 
   if (notFound || !post) {
     return (
-      <ProtectedRoute>
+      <>
         <div className="min-h-screen bg-[#f5f7fb] text-neutral-950 dark:bg-[#07080c] dark:text-neutral-50">
           <nav className="fixed left-0 top-0 z-50 w-full border-b border-black/10 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-[#090b10]/90">
             <NavButtons onBack={() => router.back()} title="Article" />
@@ -135,12 +134,12 @@ export default function NewsArticle() {
           </main>
           <Navbar />
         </div>
-      </ProtectedRoute>
+      </>
     );
   }
 
   return (
-    <ProtectedRoute>
+    <>
       <div className="min-h-screen bg-[#f5f7fb] text-neutral-950 dark:bg-[#07080c] dark:text-neutral-50">
         <nav className="fixed left-0 top-0 z-50 w-full border-b border-black/10 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-[#090b10]/90">
           <NavButtons onBack={() => router.back()} onShare={handleShare} title="Article" />
@@ -194,6 +193,6 @@ export default function NewsArticle() {
 
         <Navbar />
       </div>
-    </ProtectedRoute>
+    </>
   );
 }

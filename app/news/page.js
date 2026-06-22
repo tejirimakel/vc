@@ -14,7 +14,6 @@ import {
 } from 'react-icons/io5';
 import Navbar from '@/components/nav';
 import NavButtons from '@/components/navButtons';
-import ProtectedRoutes from '@/components/protectedRoutes';
 import { cleanText, cutTitle, makeExcerpt } from '@/lib/text';
 import { formatDate } from '@/lib/format';
 import { useFetch } from '@/lib/useFetch';
@@ -25,7 +24,7 @@ const EMPTY = [];
 
 function NewsSkeleton() {
   return (
-    <ProtectedRoutes>
+    <>
       <div className="min-h-screen bg-[#f5f7fb] text-neutral-950 dark:bg-[#07080c] dark:text-neutral-50">
         <div className="fixed left-0 top-0 z-50 h-16 w-full border-b border-black/10 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-[#090b10]/90" />
         <main className="mx-auto max-w-3xl px-4 pb-28 pt-24 animate-pulse">
@@ -48,7 +47,7 @@ function NewsSkeleton() {
         </main>
         <Navbar />
       </div>
-    </ProtectedRoutes>
+    </>
   );
 }
 
@@ -93,7 +92,7 @@ export default function NewsListPage() {
   if (loading) return <NewsSkeleton />;
 
   return (
-    <ProtectedRoutes>
+    <>
       <div className="min-h-screen bg-[#f5f7fb] text-neutral-950 dark:bg-[#07080c] dark:text-neutral-50">
         <nav className="fixed left-0 top-0 z-50 w-full border-b border-black/10 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-[#090b10]/90">
           <NavButtons onBack={() => router.back()} onShare={handleShare} title="Latest News" />
@@ -243,6 +242,6 @@ export default function NewsListPage() {
 
         <Navbar />
       </div>
-    </ProtectedRoutes>
+    </>
   );
 }

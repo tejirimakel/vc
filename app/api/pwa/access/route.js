@@ -12,7 +12,7 @@ function getAllowedOrigin(req) {
   if (!origin) return null;
 
   const requestOrigin = new URL(req.url).origin;
-  if (origin === requestOrigin || origin === 'null') return origin;
+  if (origin === requestOrigin) return origin;
 
   return false;
 }
