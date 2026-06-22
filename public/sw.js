@@ -6,6 +6,8 @@ const OFFLINE_CACHE = 'offline-cache-v2';
 const OFFLINE_URL   = '/offline';
 
 const ALL_CACHES = [PAGES_CACHE, API_CACHE, IMAGE_CACHE, PDF_CACHE, OFFLINE_CACHE];
+// Hand-mirrored from lib/protectedRoutes.js — the SW runs in a separate bundle
+// and cannot import. Keep these two lists in sync.
 const PROTECTED_PAGE_PREFIXES = ['/mobile', '/news', '/ecopy', '/video', '/stream'];
 const PROTECTED_API_PREFIXES = ['/api/news', '/api/ecopy', '/api/pdf', '/api/stream', '/api/youtube'];
 
