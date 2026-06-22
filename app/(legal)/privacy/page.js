@@ -55,11 +55,6 @@ export default function PrivacyPolicyPage() {
           expires after up to 30 days.
         </li>
         <li>
-          <strong>Usage analytics (Vercel Analytics).</strong> We use Vercel
-          Analytics to understand aggregate traffic, such as which articles are
-          read.
-        </li>
-        <li>
           <strong>Technical logs (IP address &amp; request data).</strong> When
           your browser requests content through our server routes, our hosting
           provider processes your IP address, request time, user agent, and the
@@ -84,7 +79,6 @@ export default function PrivacyPolicyPage() {
       <ul>
         <li>To deliver articles, e-copy editions, and video to your device.</li>
         <li>To operate and secure the Service and prevent abuse of our endpoints.</li>
-        <li>To understand audience trends in aggregate and improve our content.</li>
         <li>To comply with legal obligations and respond to lawful requests.</li>
       </ul>
       <p>
@@ -95,16 +89,16 @@ export default function PrivacyPolicyPage() {
       <h2>Legal bases for processing</h2>
       <p>
         We rely on our <strong>legitimate interests</strong> (operating a secure
-        service, the functional app-session cookie, aggregate analytics, and
-        server logs) and on your <strong>consent</strong> for non-essential
-        cookies and third-party tracking, including YouTube, for readers in the
-        EU and UK. Where we rely on consent, you may withdraw it at any time.
+        service, the functional app-session cookie, and server logs) and on your{" "}
+        <strong>consent</strong> for non-essential cookies and third-party
+        tracking, including embedded YouTube video, for readers in the EU and UK.
+        Where we rely on consent, you may withdraw it at any time.
       </p>
 
       <h2>Sharing and third parties</h2>
       <p>We share data only with service providers that help us run the Service:</p>
       <ul>
-        <li><strong>Vercel</strong> — hosting, content delivery, and analytics.</li>
+        <li><strong>Vercel</strong> — hosting and content delivery.</li>
         <li><strong>Google / YouTube</strong> — video playback (only when you play a video).</li>
         <li>Our publishing back end — source of articles and e-copy content.</li>
       </ul>
@@ -126,7 +120,6 @@ export default function PrivacyPolicyPage() {
       <ul>
         <li>App-session cookie: up to 30 days, then it expires.</li>
         <li>Server/access logs: retained no longer than [retention window to be confirmed], then deleted or anonymised.</li>
-        <li>Analytics: retained per Vercel&apos;s retention settings.</li>
       </ul>
 
       <h2>Your rights</h2>
@@ -151,10 +144,10 @@ export default function PrivacyPolicyPage() {
       <h2>Cookies and consent</h2>
       <p>
         We use a small number of cookies: the strictly necessary{" "}
-        <code>tvc_pwa_access</code> cookie, Vercel Analytics, and third-party
-        YouTube cookies set only when you play a video. You can manage cookies in
-        your browser settings. For visitors in the EU/UK, non-essential cookies
-        (including YouTube) are set only after you consent.
+        <code>tvc_pwa_access</code> cookie, and third-party YouTube cookies set
+        only when you play a video. You can manage cookies in your browser
+        settings. For visitors in the EU/UK, non-essential cookies (including
+        YouTube) are set only after you consent.
       </p>
 
       <h2>Data security</h2>

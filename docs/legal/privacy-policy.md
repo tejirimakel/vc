@@ -28,15 +28,16 @@ The data controller is **TheValueChain**.
 We deliberately collect very little. We do **not** ask for your name, email, or any account details, because the Service has no accounts.
 
 1. **App-session cookie (`tvc_pwa_access`).** A first-party cookie we set to mark an app session and keep the installed-app experience distinct from the public website. It contains a signed timestamp value, **not** your identity, and is not used for advertising or tracking across other sites. It expires after up to 30 days.
-2. **Usage analytics (Vercel Analytics).** We use Vercel Analytics to understand aggregate traffic — for example, which articles are read and roughly where visitors come from. [⚠️ LEGAL REVIEW REQUIRED — confirm whether your Vercel Analytics configuration is cookieless/aggregated or sets identifiers, as this determines whether prior consent is required for EU/UK visitors.]
-3. **Technical logs (IP address & request data).** When your browser requests content through our server routes (which proxy news, e-copy PDFs, YouTube data, and the stream), our hosting provider processes your **IP address**, request time, user agent, and the resource requested. We use this to deliver content, keep the Service secure, and detect abuse. IP addresses are treated as personal data.
-4. **Embedded YouTube videos.** Video is delivered via embedded YouTube players. We load YouTube only when you choose to play a video. At that point, **Google/YouTube** may set its own cookies and collect data under Google's own privacy policy. This is third-party processing we do not control beyond choosing to embed it. [⚠️ LEGAL REVIEW REQUIRED — for EU/UK visitors, third-party YouTube cookies should be loaded only after consent.]
+2. **Technical logs (IP address & request data).** When your browser requests content through our server routes (which proxy news, e-copy PDFs, YouTube data, and the stream), our hosting provider processes your **IP address**, request time, user agent, and the resource requested. We use this to deliver content, keep the Service secure, and detect abuse. IP addresses are treated as personal data.
+3. **Embedded YouTube videos.** Video is delivered via embedded YouTube players. We load YouTube only when you choose to play a video. At that point, **Google/YouTube** may set its own cookies and collect data under Google's own privacy policy. This is third-party processing we do not control beyond choosing to embed it. [⚠️ LEGAL REVIEW REQUIRED — for EU/UK visitors, third-party YouTube cookies should be loaded only after consent.]
+
+> **Note:** We do not currently run product analytics (e.g. Vercel Analytics). If analytics is introduced later, this policy must be updated and the analytics gated behind consent for EU/UK visitors.
 
 We do **not** knowingly collect special-category data (health, biometric, political, etc.), and we do not collect payment data.
 
 ## How we collect it
 
-- **Automatically**, as you browse: the app-session cookie, analytics, and server logs.
+- **Automatically**, as you browse: the app-session cookie and server logs.
 - **From third parties**, only when you interact: Google/YouTube when you play a video. Content itself is fetched from our publishing back end (WordPress) and YouTube.
 
 ## How we use your data
@@ -56,7 +57,6 @@ We do **not** sell or rent your personal data, and we do not use it for cross-si
 |---|---|
 | App-session cookie (`tvc_pwa_access`) | Necessary to provide the app experience you requested / legitimate interests |
 | Server logs & IP for delivery and security | Legitimate interests (operating a secure service) |
-| Aggregate analytics | Legitimate interests, or **consent** where required for non-essential cookies/identifiers (EU/UK) |
 | YouTube embeds & third-party cookies | **Consent** (EU/UK) |
 
 Where we rely on consent, you can withdraw it at any time (see "Cookies and consent" and "Your rights").
@@ -65,7 +65,7 @@ Where we rely on consent, you can withdraw it at any time (see "Cookies and cons
 
 We share data only with service providers that help us run the Service:
 
-- **Vercel** — hosting, content delivery, and analytics.
+- **Vercel** — hosting and content delivery.
 - **Google / YouTube** — video playback (only when you play a video).
 - **Our publishing back end (WordPress host)** — source of articles and e-copy content.
 
@@ -81,7 +81,6 @@ Our hosting and some processors (e.g., **Vercel**, **Google**) store and process
 
 - **App-session cookie:** up to 30 days, then it expires.
 - **Server/access logs:** retained for no longer than **[⚠️ LEGAL REVIEW REQUIRED — confirm the actual retention window with your host, e.g., 30–90 days]**, then deleted or anonymised.
-- **Analytics:** retained per Vercel's retention settings. [⚠️ LEGAL REVIEW REQUIRED — state the configured period.]
 
 We keep personal data only as long as needed for the purposes above or as required by law.
 
@@ -106,10 +105,9 @@ You may complain to the **Nigeria Data Protection Commission (NDPC)** (Nigeria) 
 We use a small number of cookies and similar technologies:
 
 - **Strictly necessary / functional:** the `tvc_pwa_access` app-session cookie.
-- **Analytics:** Vercel Analytics. [⚠️ LEGAL REVIEW REQUIRED — confirm cookie vs. cookieless.]
 - **Third-party (YouTube):** set by Google only when you play a video.
 
-You can manage or block cookies in your browser settings. **For visitors in the EU/UK, non-essential cookies (including YouTube/third-party tracking) will only be set after you consent** via our cookie banner. [⚠️ LEGAL REVIEW REQUIRED — this requires implementing a consent banner that gates YouTube and any non-essential analytics; see the launch-readiness spec.]
+You can manage or block cookies in your browser settings. **For visitors in the EU/UK, non-essential cookies (including YouTube/third-party tracking) will only be set after you consent** via our cookie banner, which gates the YouTube embed until you choose to load it.
 
 ## Data security
 
