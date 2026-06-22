@@ -36,6 +36,10 @@ export default function EcopyDetailPage() {
   const [containerWidth, setContainerWidth] = useState(345);
   const [error, setError] = useState(null);
 
+  // Disable pdf.js's eval-based code path so the page works under a CSP without
+  // 'unsafe-eval'. Memoized so <Document> doesn't reload on every render.
+  const pdfOptions = useMemo(() => ({ isEvalSupported: false }), []);
+
   useEffect(() => {
     const element = containerRef.current;
     if (!element) return;
@@ -143,6 +147,7 @@ export default function EcopyDetailPage() {
           >
             <Document
               file={proxiedUrl}
+              options={pdfOptions}
               onLoadSuccess={({ numPages: pages }) => {
                 setNumPages(pages);
                 setPageNumber((page) => Math.min(page, pages));

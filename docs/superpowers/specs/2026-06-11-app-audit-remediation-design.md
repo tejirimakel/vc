@@ -100,6 +100,33 @@ Phases are ordered by risk-adjusted value; each is independently shippable. Earl
 - Backend/WordPress changes.
 - Visual redesign beyond aligning the `video` page with the existing red theme.
 
+## 4a. Remediation status (updated 2026-06-21)
+
+- **Phase 0 (hygiene)** — done (commit 6103268).
+- **Phase 1 (correctness)** — done (commit 2e26eab).
+- **Phase 2 (DRY)** — done. `lib/text.js`, `lib/format.js`, `lib/useFetch.js`,
+  `lib/pwaClient.js`, `lib/protectedRoutes.js` extracted; five pages + four PWA-access
+  callers refactored; dead `app/actions.ts` deleted.
+- **Phase 3 (security)** — done. Dropped `Origin: 'null'`; split access secret from
+  `REVALIDATION_SECRET`; PDF proxy gained a 10s timeout + 50 MB streaming cap; the no-op
+  `ProtectedRoutes` component was deleted and its importers unwrapped.
+- **Phase 4 (performance)** — done. `25.png`/`27.png` were unreferenced dead assets
+  (deleted, ~9.8 MB); `2.png`/`26.png` re-encoded to WebP (0.57 MB→40 KB, 3.87 MB→60 KB)
+  and the secondary mockup dropped `priority`. CSP `script-src` dropped `'unsafe-eval'`
+  (pdf.js now runs with `isEvalSupported:false`); `'unsafe-inline'` kept (needs a Next
+  nonce pipeline to remove). YouTube facade item (#20) was already satisfied — only the
+  selected video is a live iframe.
+
+### New findings beyond the original audit (fixed 2026-06-21)
+- **Service-worker caching was unreachable.** The protected-API branch returned
+  network-only before the SWR/CacheFirst branches, so no API JSON or PDF was ever cached
+  and the offline page's "Saved articles" promise never held. Router reordered: `/api/pdf`
+  CacheFirst, `/api/news|ecopy|youtube` SWR, `/api/stream` network-only; caches bumped to v3.
+- **Video titles rendered raw HTML entities** — the page's local `cleanText` omitted
+  `he.decode`; fixed by the shared helper.
+- PWA-access POST was duplicated **4×** (not 3) — all now call `requestPwaAccess`.
+- `app/actions.ts` was dead and was removed.
+
 ## 5. Success criteria
 - `next build` + `next lint` clean after each phase.
 - No `" 2.js"` files, no unused deps, no dead modules.

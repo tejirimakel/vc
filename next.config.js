@@ -2,7 +2,11 @@
 
 const appCSP = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  // 'unsafe-inline' is still required by Next's inline bootstrap/streaming
+  // scripts (removing it needs a per-request nonce pipeline). 'unsafe-eval'
+  // was removed: the only eval consumer was pdf.js, now run with
+  // isEvalSupported:false (see app/ecopy/[id]/page.js).
+  "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com",
   "img-src 'self' data: https: blob:",
