@@ -20,6 +20,7 @@ import {
 } from "react-icons/io5";
 import { cleanText, makeExcerpt } from "@/lib/text";
 import { formatDate } from "@/lib/format";
+import ConsentedYouTube from "@/components/consent/ConsentedYouTube";
 
 const VIDEOS_PER_PAGE = 6;
 const DATE_OPTIONS = { month: "short", day: "numeric", year: "numeric" };
@@ -206,13 +207,10 @@ export default function Videos() {
               <section className="mt-6 grid gap-5 lg:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.75fr)]">
                 <div className="overflow-hidden rounded-lg border border-black/10 bg-white shadow-sm dark:border-white/10 dark:bg-white/5">
                   <div className="relative aspect-video bg-black">
-                    <iframe
-                      src={`https://www.youtube.com/embed/${selectedVideo.id}?rel=0&modestbranding=1`}
+                    <ConsentedYouTube
+                      videoId={selectedVideo.id}
                       title={selectedVideo.title}
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      sandbox="allow-scripts allow-same-origin allow-presentation allow-popups allow-forms"
-                      allowFullScreen
-                      className="absolute inset-0 h-full w-full"
+                      poster={getThumbnail(selectedVideo)}
                     />
                   </div>
                   <div className="p-4 sm:p-5">
