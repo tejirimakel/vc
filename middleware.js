@@ -1,18 +1,10 @@
 import { NextResponse } from "next/server";
 import { ACCESS_COOKIE_NAME, verifyAccessToken } from "@/lib/pwaAccess";
-
-const PROTECTED_PAGE_PREFIXES = ["/mobile", "/news", "/ecopy", "/video", "/stream"];
-const PROTECTED_API_PREFIXES = [
-  "/api/news",
-  "/api/ecopy",
-  "/api/pdf",
-  "/api/stream",
-  "/api/youtube",
-];
-
-function pathStartsWith(pathname, prefixes) {
-  return prefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
-}
+import {
+  PROTECTED_API_PREFIXES,
+  PROTECTED_PAGE_PREFIXES,
+  pathStartsWith,
+} from "@/lib/protectedRoutes";
 
 export async function middleware(req) {
   const url = req.nextUrl;

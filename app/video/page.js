@@ -19,31 +19,12 @@ import {
   IoTimeOutline,
   IoVideocamOutline,
 } from "react-icons/io5";
+import { cleanText, makeExcerpt } from "@/lib/text";
+import { formatDate } from "@/lib/format";
 
 const VIDEOS_PER_PAGE = 6;
-
-const cleanText = (value = "") =>
-  String(value)
-    .replace(/<[^>]*>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-const makeExcerpt = (value = "") => {
-  const words = cleanText(value).split(" ").filter(Boolean);
-  if (!words.length) return "Watch the latest video update from TheValueChain.";
-  return words.slice(0, 22).join(" ") + (words.length > 22 ? "..." : "");
-};
-
-const formatDate = (dateString) => {
-  if (!dateString) return "Latest";
-  const date = new Date(dateString);
-  if (Number.isNaN(date.getTime())) return "Latest";
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(date);
-};
+const DATE_OPTIONS = { month: "short", day: "numeric", year: "numeric" };
+const EXCERPT_OPTIONS = { words: 22, fallback: "Watch the latest video update from TheValueChain." };
 
 const getThumbnail = (video) =>
   video?.thumbnailUrl || (video?.id ? `https://img.youtube.com/vi/${video.id}/hqdefault.jpg` : "");
@@ -239,7 +220,7 @@ export default function Videos() {
                     <div className="flex flex-wrap items-center gap-2 text-xs font-bold uppercase text-neutral-500 dark:text-neutral-400">
                       <span className="inline-flex items-center gap-1">
                         <IoCalendarClearOutline className="h-4 w-4 text-red-700 dark:text-red-300" aria-hidden="true" />
-                        {formatDate(selectedVideo.published)}
+                        {formatDate(selectedVideo.published, DATE_OPTIONS)}
                       </span>
                       <span className="h-1 w-1 rounded-full bg-neutral-300 dark:bg-neutral-700" aria-hidden="true" />
                       <span className="inline-flex items-center gap-1">
@@ -251,7 +232,7 @@ export default function Videos() {
                       {cleanText(selectedVideo.title)}
                     </h2>
                     <p className="mt-3 max-w-3xl text-sm leading-6 text-neutral-600 dark:text-neutral-300">
-                      {makeExcerpt(selectedVideo.description)}
+                      {makeExcerpt(selectedVideo.description, EXCERPT_OPTIONS)}
                     </p>
                     <div className="mt-5 flex flex-wrap gap-3">
                       <a
@@ -316,7 +297,7 @@ export default function Videos() {
                               {cleanText(video.title)}
                             </span>
                             <span className="mt-2 block text-xs font-semibold text-neutral-500 dark:text-neutral-400">
-                              {formatDate(video.published)}
+                              {formatDate(video.published, DATE_OPTIONS)}
                             </span>
                           </span>
                         </button>
@@ -384,7 +365,7 @@ export default function Videos() {
                             </span>
                             <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-neutral-500 dark:text-neutral-400">
                               <IoCalendarClearOutline className="h-4 w-4 text-red-700 dark:text-red-300" aria-hidden="true" />
-                              {formatDate(video.published)}
+                              {formatDate(video.published, DATE_OPTIONS)}
                             </span>
                           </span>
                         </button>

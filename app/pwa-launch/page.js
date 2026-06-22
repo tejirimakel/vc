@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { IoReloadOutline } from "react-icons/io5";
 import { isInstalledPwa } from "@/lib/pwaDisplayMode";
+import { requestPwaAccess } from "@/lib/pwaClient";
 
 export default function PwaLaunchPage() {
   const router = useRouter();
@@ -27,18 +28,7 @@ export default function PwaLaunchPage() {
       }
 
       try {
-        const response = await fetch("/api/pwa/access", {
-          method: "POST",
-          headers: { "x-tvc-pwa-launch": "standalone" },
-          credentials: "include",
-          cache: "no-store",
-        });
-
-        if (!response.ok) {
-          const data = await response.json().catch(() => ({}));
-          throw new Error(data.error || `PWA access failed with ${response.status}`);
-        }
-
+        await requestPwaAccess("standalone");
         if (!cancelled) router.replace("/mobile");
       } catch (error) {
         console.error("PWA launch failed:", error);

@@ -3,6 +3,7 @@
 import { useEffect } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { isInstalledPwa } from "@/lib/pwaDisplayMode"
+import { requestPwaAccess } from "@/lib/pwaClient"
 
 export default function MobileRedirect() {
   const router = useRouter()
@@ -16,12 +17,8 @@ export default function MobileRedirect() {
     if (!installedPwa && pathname === "/") return
 
     if (installedPwa) {
-      fetch("/api/pwa/access", {
-        method: "POST",
-        headers: { "x-tvc-pwa-launch": "standalone" },
-      })
-        .then((response) => {
-          if (!response.ok) throw new Error("PWA access failed")
+      requestPwaAccess("standalone")
+        .then(() => {
           if (!cancelled && pathname !== "/mobile") router.replace("/mobile")
         })
         .catch((error) => {

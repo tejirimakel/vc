@@ -6,7 +6,6 @@ import Navbar from '@/components/nav';
 import NavButtons from '@/components/navButtons';
 import { useEffect, useMemo, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { decode } from 'he';
 import {
   IoAlertCircleOutline,
   IoCalendarOutline,
@@ -15,38 +14,10 @@ import {
   IoReloadOutline,
 } from 'react-icons/io5';
 import ProtectedRoute from '@/components/protectedRoutes';
+import { cleanText, getParagraphs } from '@/lib/text';
+import { formatDate } from '@/lib/format';
 
-const cleanText = (value = '') =>
-  decode(String(value))
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-const getParagraphs = (html = '') => {
-  const text = decode(String(html))
-    .replace(/<\/(p|div|h[1-6]|li|blockquote)>/gi, '\n\n')
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/[ \t]+/g, ' ')
-    .replace(/\n[ \t]+/g, '\n')
-    .trim();
-
-  return text
-    .split(/\n{2,}/)
-    .map((paragraph) => paragraph.replace(/\s+/g, ' ').trim())
-    .filter(Boolean);
-};
-
-const formatDate = (dateString) => {
-  if (!dateString) return 'Latest';
-  const date = new Date(dateString);
-  if (Number.isNaN(date.getTime())) return 'Latest';
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  }).format(date);
-};
+const DATE_OPTIONS = { year: 'numeric', month: 'long', day: 'numeric' };
 
 function ArticleSkeleton() {
   return (
@@ -184,7 +155,7 @@ export default function NewsArticle() {
               </span>
               <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 text-neutral-500 shadow-sm dark:bg-white/10 dark:text-neutral-300">
                 <IoCalendarOutline className="h-4 w-4" aria-hidden="true" />
-                {formatDate(post.date)}
+                {formatDate(post.date, DATE_OPTIONS)}
               </span>
             </div>
 
