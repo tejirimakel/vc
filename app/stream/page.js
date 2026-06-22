@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Navbar from '@/components/nav';
-import ProtectedRoutes from '@/components/protectedRoutes';
 import { useRouter } from 'next/navigation';
 
 export default function StreamPage() {
@@ -77,7 +76,7 @@ export default function StreamPage() {
   }, [streamUrl]);
 
   return (
-    <ProtectedRoutes>
+    <>
       <div className="flex flex-col min-h-screen bg-inherit pb-20">
         <nav className="fixed top-0 left-0 w-full z-50 bg-neutral-50/50 dark:bg-neutral-950/50 px-4 py-3 backdrop-blur-md shadow-sm flex items-center justify-between">
           <h1 className="text-lg font-bold dark:text-neutral-200">Live Stream</h1>
@@ -129,6 +128,6 @@ export default function StreamPage() {
 
         <Navbar />
       </div>
-    </ProtectedRoutes>
+    </>
   );
 }

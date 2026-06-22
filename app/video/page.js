@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Navbar from "@/components/nav";
 import NavButtons from "@/components/navButtons";
-import ProtectedRoute from "@/components/protectedRoutes";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -31,7 +30,7 @@ const getThumbnail = (video) =>
 
 function VideoSkeleton() {
   return (
-    <ProtectedRoute>
+    <>
       <div className="min-h-screen bg-[#f5f7fb] text-neutral-950 dark:bg-[#07080c] dark:text-neutral-50">
         <div className="fixed left-0 top-0 z-50 h-16 w-full border-b border-black/10 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-[#090b10]/90" />
         <main className="mx-auto max-w-6xl animate-pulse px-4 pb-28 pt-24">
@@ -75,7 +74,7 @@ function VideoSkeleton() {
         </main>
         <Navbar />
       </div>
-    </ProtectedRoute>
+    </>
   );
 }
 
@@ -154,7 +153,7 @@ export default function Videos() {
   if (loading) return <VideoSkeleton />;
 
   return (
-    <ProtectedRoute>
+    <>
       <div className="min-h-screen bg-[#f5f7fb] text-neutral-950 dark:bg-[#07080c] dark:text-neutral-50">
         <nav className="fixed left-0 top-0 z-50 w-full border-b border-black/10 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-[#090b10]/90">
           <NavButtons onBack={() => router.back()} onShare={handleShare} title="Videos" />
@@ -403,6 +402,6 @@ export default function Videos() {
 
         <Navbar />
       </div>
-    </ProtectedRoute>
+    </>
   );
 }

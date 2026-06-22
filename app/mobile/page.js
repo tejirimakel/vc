@@ -18,7 +18,6 @@ import SearchOverlay from "@/components/searchOverlay";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import "swiper/css";
-import ProtectedRoutes from "@/components/protectedRoutes";
 import { cleanText, cutTitle, makeExcerpt } from "@/lib/text";
 import { formatDate } from "@/lib/format";
 import { useFetch } from "@/lib/useFetch";
@@ -95,7 +94,7 @@ export default function MobileHome() {
   }, [newsFeed, searchQuery, selectedCategory]);
 
   return (
-    <ProtectedRoutes>
+    <>
       <SplashScreen />
 
       <div className="min-h-screen bg-[#f5f7fb] text-neutral-950 dark:bg-[#07080c] dark:text-neutral-50">
@@ -285,6 +284,6 @@ export default function MobileHome() {
         />
         <Navbar />
       </div>
-    </ProtectedRoutes>
+    </>
   );
 }
