@@ -50,7 +50,7 @@ jobs:
           npm audit --audit-level=moderate 2>&1 | tail -20 >> $GITHUB_STEP_SUMMARY || true
 
       - name: Upload audit report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: npm-audit-report
           path: audit-report.json
@@ -119,7 +119,7 @@ jobs:
           npm outdated 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
 
       - name: Upload outdated report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: outdated-packages-report
           path: outdated-report.json
