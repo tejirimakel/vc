@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { IoClose } from "react-icons/io5"
 import { isInstalledPwa } from "@/lib/pwaDisplayMode"
+import { requestPwaAccess } from "@/lib/pwaClient"
 
 const COOKIE_FLAGS = "; path=/; max-age=604800; SameSite=Lax; Secure"
 const INSTALLED_FLAGS = "; path=/; max-age=31536000; SameSite=Lax; Secure"
@@ -45,10 +46,7 @@ export default function InstallPrompt() {
     const choiceResult = await deferredPrompt.userChoice
     if (choiceResult.outcome === "accepted") {
       document.cookie = "pwa-installed=true" + INSTALLED_FLAGS
-      await fetch("/api/pwa/access", {
-        method: "POST",
-        headers: { "x-tvc-pwa-launch": "install-accepted" },
-      }).catch((error) => {
+      await requestPwaAccess("install-accepted").catch((error) => {
         console.error("PWA access failed:", error)
       })
     }

@@ -27,10 +27,10 @@ jobs:
         uses: github/codeql-action/init@v3
         with:
           languages: javascript-typescript
+          # JS/TS needs no compilation — `none` skips the pointless autobuild
+          # step (which can fail) and analyzes the source directly.
+          build-mode: none
           queries: security-and-quality
-
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
@@ -60,7 +60,9 @@ jobs:
         if: always()
         run: |
           echo "### Security Audit" >> $GITHUB_STEP_SUMMARY
-          npm audit 2>&1 >> $GITHUB_STEP_SUMMARY || true
+          # Redirect order matters: `>> file 2>&1` captures both streams into
+          # the summary; the reverse (`2>&1 >> file`) leaves stderr on console.
+          npm audit >> $GITHUB_STEP_SUMMARY 2>&1 || true
 
   secret-scan:
     name: Secret Scanning

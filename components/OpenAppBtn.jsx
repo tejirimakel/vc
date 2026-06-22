@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { IoOpenOutline } from "react-icons/io5"
 import { useRouter } from "next/navigation"
 import { isInstalledPwa } from "@/lib/pwaDisplayMode"
+import { requestPwaAccess } from "@/lib/pwaClient"
 
 export default function OpenAppButton() {
   const [installed, setInstalled] = useState(false)
@@ -19,11 +20,7 @@ export default function OpenAppButton() {
   const handleOpen = async () => {
     setOpening(true)
     try {
-      const response = await fetch("/api/pwa/access", {
-        method: "POST",
-        headers: { "x-tvc-pwa-launch": "standalone" },
-      })
-      if (!response.ok) throw new Error("PWA access failed")
+      await requestPwaAccess("standalone")
       router.push("/mobile")
     } catch (error) {
       console.error("PWA access failed:", error)

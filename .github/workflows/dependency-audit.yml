@@ -40,8 +40,10 @@ jobs:
       - name: Run npm audit (moderate+)
         id: audit
         run: |
-          npm audit --audit-level=moderate --json > audit-report.json 2>&1 || true
-          VULN_COUNT=$(cat audit-report.json | jq '.metadata.vulnerabilities | (.moderate // 0) + (.high // 0) + (.critical // 0)')
+          # Keep stderr OUT of the JSON file — npm warnings on stderr would
+          # corrupt it and break jq + the JSON.parse in the comment step.
+          npm audit --audit-level=moderate --json > audit-report.json 2>/dev/null || true
+          VULN_COUNT=$(jq '.metadata.vulnerabilities | (.moderate // 0) + (.high // 0) + (.critical // 0)' audit-report.json)
           echo "vuln_count=$VULN_COUNT" >> $GITHUB_OUTPUT
           echo "### npm Audit Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -104,9 +106,13 @@ jobs:
       - name: Check for outdated packages
         id: outdated
         run: |
-          OUTPUT=$(npm outdated --json 2>/dev/null || echo '{}')
-          echo "$OUTPUT" > outdated-report.json
-          COUNT=$(echo "$OUTPUT" | jq 'keys | length')
+          # `npm outdated --json` exits 1 when anything is outdated but still
+          # prints valid JSON to stdout (and "{}" when nothing is outdated).
+          # Capture stdout directly to the file; do NOT append `|| echo '{}'`,
+          # which would produce two concatenated JSON values and break jq +
+          # JSON.parse in the issue step.
+          npm outdated --json > outdated-report.json 2>/dev/null || true
+          COUNT=$(jq 'keys | length' outdated-report.json)
           echo "outdated_count=$COUNT" >> $GITHUB_OUTPUT
           echo "### Outdated Packages ($COUNT)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
