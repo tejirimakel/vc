@@ -19,8 +19,8 @@ export default function CookieBanner() {
       <div className="mx-auto flex max-w-4xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm leading-6 text-neutral-700 dark:text-neutral-300">
           We use a strictly necessary cookie to run the app. With your consent we
-          also load embedded video (YouTube) and analytics, which may set
-          third-party cookies. See our{' '}
+          also load embedded video (YouTube), which may set third-party cookies.
+          See our{' '}
           <Link href="/cookies" className="font-semibold text-red-700 underline dark:text-red-400">
             Cookie Policy
           </Link>{' '}

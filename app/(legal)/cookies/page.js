@@ -12,9 +12,7 @@ export default function CookiePolicyPage() {
       <p className="legal-meta">Last updated: 21 June 2026</p>
 
       <p className="legal-note">
-        Draft pending legal review. Confirm whether Vercel Analytics is
-        configured as cookieless before publication, as it changes the consent
-        requirement.
+        Draft pending legal review before publication.
       </p>
 
       <p>
@@ -32,10 +30,6 @@ export default function CookiePolicyPage() {
           signed timestamp, not your identity, and expires after up to 30 days.
           This cookie is required for the app experience and is not used for
           tracking or advertising.
-        </li>
-        <li>
-          <strong>Analytics — Vercel Analytics.</strong> Used to understand
-          aggregate traffic. [Confirm cookie vs. cookieless configuration.]
         </li>
         <li>
           <strong>Third-party — YouTube (Google).</strong> Set by Google only
