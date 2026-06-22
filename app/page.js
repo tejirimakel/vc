@@ -1,4 +1,5 @@
 import Image from "next/image"
+import Link from "next/link"
 import InstallPrompt from "@/components/prompt"
 import MobileRedirect from "@/components/mobileRed"
 import OpenAppButton from "@/components/OpenAppBtn"
@@ -176,6 +177,14 @@ export default function Home() {
       <InstallPrompt />
 
       <footer className="px-5 py-8 text-center text-xs font-medium text-neutral-500 dark:text-neutral-400">
+        <nav className="mb-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+          <Link href="/privacy" className="hover:text-red-700 dark:hover:text-red-400">Privacy</Link>
+          <Link href="/terms" className="hover:text-red-700 dark:hover:text-red-400">Terms</Link>
+          <Link href="/cookies" className="hover:text-red-700 dark:hover:text-red-400">Cookies</Link>
+          <Link href="/editorial" className="hover:text-red-700 dark:hover:text-red-400">Editorial</Link>
+          <Link href="/copyright" className="hover:text-red-700 dark:hover:text-red-400">Copyright</Link>
+          <Link href="/about" className="hover:text-red-700 dark:hover:text-red-400">About</Link>
+        </nav>
         © <CurrentYear /> TheValueChain. All rights reserved.
       </footer>
     </main>

@@ -65,3 +65,54 @@ body {
 .no-scroll {
   overflow: hidden;
 }
+
+/* Legal pages (privacy, terms, cookies, etc.) — scoped prose styling.
+   Defined here because @tailwindcss/typography is not installed. */
+.legal-prose h1 {
+  font-size: 1.875rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--color-neutral-900, #171717);
+}
+.legal-prose h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-top: 2rem;
+  color: var(--color-neutral-900, #171717);
+}
+.legal-prose h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+}
+.legal-prose a {
+  color: #b91c1c;
+  text-decoration: underline;
+}
+.legal-prose ul {
+  list-style: disc;
+  padding-left: 1.5rem;
+}
+.legal-prose ul li {
+  margin-top: 0.35rem;
+}
+.legal-prose .legal-meta {
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+.legal-prose .legal-note {
+  border-left: 3px solid #b91c1c;
+  background: rgba(185, 28, 28, 0.06);
+  padding: 0.75rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.9rem;
+}
+@media (prefers-color-scheme: dark) {
+  .legal-prose h1,
+  .legal-prose h2 {
+    color: #f5f5f5;
+  }
+  .legal-prose a {
+    color: #f87171;
+  }
+}
