@@ -32,7 +32,18 @@ export default function PwaLaunchPage() {
         if (!cancelled) router.replace("/mobile");
       } catch (error) {
         console.error("PWA launch failed:", error);
-        if (!cancelled) {
+        if (cancelled) return;
+
+        // Offline: the access API is unreachable, but the app shell and cached
+        // content may still be available. Proceed into the app, where the
+        // service worker serves the cached page (or the offline page) instead
+        // of stranding the user on the launch screen.
+        if (typeof navigator !== "undefined" && navigator.onLine === false) {
+          router.replace("/mobile");
+          return;
+        }
+
+        {
           const message = error.message || "PWA access failed";
           const permanentFailure =
             message === "PWA access secret is not configured" ||

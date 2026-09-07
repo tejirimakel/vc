@@ -4,17 +4,19 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '@/components/nav';
 import NavButtons from '@/components/navButtons';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import {
   IoAlertCircleOutline,
   IoCalendarOutline,
   IoChevronBack,
+  IoCloudOfflineOutline,
   IoNewspaperOutline,
   IoReloadOutline,
 } from 'react-icons/io5';
 import { cleanText, getParagraphs } from '@/lib/text';
 import { formatDate } from '@/lib/format';
+import { useFetch } from '@/lib/useFetch';
 
 const DATE_OPTIONS = { year: 'numeric', month: 'long', day: 'numeric' };
 
@@ -41,43 +43,14 @@ function ArticleSkeleton() {
 }
 
 export default function NewsArticle() {
-  const [post, setPost] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
-  const [retryCount, setRetryCount] = useState(0);
   const router = useRouter();
   const params = useParams();
   const id = params?.id;
 
-  useEffect(() => {
-    if (!id) return;
-
-    async function fetchArticle() {
-      setLoading(true);
-      setNotFound(false);
-
-      try {
-        const response = await fetch(`/api/news?id=${encodeURIComponent(id)}`);
-        if (response.status === 404 || !response.ok) {
-          setNotFound(true);
-          return;
-        }
-        const data = await response.json();
-        if (data.error) {
-          setNotFound(true);
-          return;
-        }
-        setPost(data);
-      } catch (err) {
-        console.error('Error fetching article:', err);
-        setNotFound(true);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchArticle();
-  }, [id, retryCount]);
+  const { data: post, loading, error, stale, retry } = useFetch(
+    id ? `/api/news?id=${encodeURIComponent(id)}` : null,
+    { enabled: !!id, cacheKey: id ? `news-article:${id}` : undefined }
+  );
 
   const title = cleanText(post?.title);
   const categoryLabel = Array.isArray(post?.categories)
@@ -98,9 +71,9 @@ export default function NewsArticle() {
     }
   };
 
-  if (loading) return <ArticleSkeleton />;
+  if (loading && !post) return <ArticleSkeleton />;
 
-  if (notFound || !post) {
+  if (!post) {
     return (
       <>
         <div className="min-h-screen bg-[#f5f7fb] text-neutral-950 dark:bg-[#07080c] dark:text-neutral-50">
@@ -111,13 +84,15 @@ export default function NewsArticle() {
             <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300">
               <IoAlertCircleOutline className="h-9 w-9" aria-hidden="true" />
             </div>
-            <h1 className="mt-5 text-2xl font-black">Article not found</h1>
+            <h1 className="mt-5 text-2xl font-black">Article unavailable</h1>
             <p className="mt-2 text-sm leading-6 text-neutral-600 dark:text-neutral-300">
-              This story may have moved or the feed may be unavailable.
+              {error
+                ? `${error} We'll keep retrying automatically.`
+                : 'This story may have moved or the feed may be unavailable.'}
             </p>
             <div className="mt-6 flex flex-col gap-3 sm:flex-row">
               <button
-                onClick={() => setRetryCount((count) => count + 1)}
+                onClick={retry}
                 className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-red-700 px-6 text-sm font-bold text-white transition-colors hover:bg-red-600"
               >
                 <IoReloadOutline className="h-5 w-5" aria-hidden="true" />
@@ -156,6 +131,12 @@ export default function NewsArticle() {
                 <IoCalendarOutline className="h-4 w-4" aria-hidden="true" />
                 {formatDate(post.date, DATE_OPTIONS)}
               </span>
+              {stale && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-3 py-1 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
+                  <IoCloudOfflineOutline className="h-4 w-4" aria-hidden="true" />
+                  Saved copy
+                </span>
+              )}
             </div>
 
             <h1 className="mt-5 text-3xl font-black leading-tight sm:text-5xl">

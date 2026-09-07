@@ -4,6 +4,8 @@ import { Poppins } from "next/font/google";
 import ServiceWorkerRegistration from "@/components/swRegister";
 import { ConsentProvider } from "@/components/consent/ConsentProvider";
 import CookieBanner from "@/components/consent/CookieBanner";
+import NetworkStatus from "@/components/networkStatus";
+import ChunkErrorGuard from "@/components/chunkErrorGuard";
 
 const poppins = Poppins({
   weight: ["300", "400", "500", "600", "700", "800", "900"],
@@ -62,7 +64,9 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" className={`${poppins.className} antialiased`}>
       <body className="bg-gray-50 dark:bg-neutral-950 antialiased">
+        <ChunkErrorGuard />
         <ServiceWorkerRegistration />
+        <NetworkStatus />
         <ConsentProvider>
           {children}
           <CookieBanner />

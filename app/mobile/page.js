@@ -9,6 +9,7 @@ import { MdOutlineFeed } from "react-icons/md";
 import {
   IoAlertCircleOutline,
   IoChevronForward,
+  IoCloudOfflineOutline,
   IoNewspaperOutline,
   IoReloadOutline,
   IoSearchOutline,
@@ -61,7 +62,8 @@ export default function MobileHome() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data, loading, error, retry } = useFetch("/api/news", {
+  const { data, loading, error, stale, retry } = useFetch("/api/news", {
+    cacheKey: "news-feed",
     select: (body) => ({
       newsFeed: body.newsFeed ?? [],
       categories: ["All", ...(body.categories ?? []).filter((category) => category !== "All")],
@@ -98,16 +100,16 @@ export default function MobileHome() {
       <SplashScreen />
 
       <div className="min-h-screen bg-[#f5f7fb] text-neutral-950 dark:bg-[#07080c] dark:text-neutral-50">
-        {loading && <FeedSkeleton />}
+        {loading && !data && <FeedSkeleton />}
 
-        {!loading && error && (
+        {!loading && error && !data && (
           <div className="mx-auto flex min-h-screen max-w-md flex-col items-center justify-center px-6 pb-24 text-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-red-50 text-red-700 dark:bg-red-500/10 dark:text-red-300">
               <IoAlertCircleOutline className="h-9 w-9" aria-hidden="true" />
             </div>
             <h1 className="mt-5 text-2xl font-black">News did not load</h1>
             <p className="mt-2 text-sm leading-6 text-neutral-600 dark:text-neutral-300">
-              Check your connection and try again. Saved pages may still be available offline.
+              {error} We&apos;ll keep retrying automatically — saved pages may still be available offline.
             </p>
             <button
               onClick={retry}
@@ -119,7 +121,7 @@ export default function MobileHome() {
           </div>
         )}
 
-        {!loading && !error && (
+        {!loading && data && (
           <>
             <nav className="fixed left-0 top-0 z-50 w-full border-b border-black/10 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-[#090b10]/90">
               <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
@@ -153,6 +155,12 @@ export default function MobileHome() {
                   Today&apos;s briefing
                 </p>
                 <h1 className="mt-1 text-3xl font-black">News headlines</h1>
+                {stale && (
+                  <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
+                    <IoCloudOfflineOutline className="h-4 w-4" aria-hidden="true" />
+                    Showing saved content — updating when you&apos;re back online
+                  </p>
+                )}
               </div>
 
               {featuredNews.length > 0 && (

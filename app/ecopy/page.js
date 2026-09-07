@@ -8,6 +8,7 @@ import {
   IoCalendarOutline,
   IoChevronBack,
   IoChevronForward,
+  IoCloudOfflineOutline,
   IoDocumentTextOutline,
   IoReloadOutline,
   IoSearchOutline,
@@ -69,7 +70,8 @@ export default function PdfPage() {
   const pdfsPerPage = 6;
   const router = useRouter();
 
-  const { data, loading, error, retry } = useFetch("/api/ecopy", {
+  const { data, loading, error, stale, retry } = useFetch("/api/ecopy", {
+    cacheKey: "ecopy-list",
     select: (body) => body.pdfs || [],
   });
   const pdfs = data || EMPTY;
@@ -110,7 +112,7 @@ export default function PdfPage() {
           </div>
         </nav>
 
-        {loading ? (
+        {loading && !data ? (
           <PdfSkeleton />
         ) : (
           <main className="mx-auto max-w-4xl px-4 pb-28 pt-24">
@@ -126,6 +128,13 @@ export default function PdfPage() {
               </p>
             </div>
 
+            {stale && pdfs.length > 0 && (
+              <p className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
+                <IoCloudOfflineOutline className="h-4 w-4" aria-hidden="true" />
+                Saved editions — refreshing automatically
+              </p>
+            )}
+
             <label className="mt-5 flex h-12 items-center gap-3 rounded-full border border-black/10 bg-white px-4 shadow-sm dark:border-white/10 dark:bg-white/5">
               <IoSearchOutline className="h-5 w-5 text-red-700 dark:text-red-300" aria-hidden="true" />
               <input
@@ -138,17 +147,19 @@ export default function PdfPage() {
               />
             </label>
 
-            {error ? (
+            {error && pdfs.length === 0 ? (
               <section className="mt-8 rounded-lg border border-red-200 bg-red-50 p-6 text-center dark:border-red-500/20 dark:bg-red-500/10">
                 <IoAlertCircleOutline className="mx-auto h-11 w-11 text-red-700 dark:text-red-300" aria-hidden="true" />
                 <h2 className="mt-3 text-lg font-black">Could not load editions</h2>
-                <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300">{error}</p>
+                <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300">
+                  {error} Retrying automatically in the background.
+                </p>
                 <button
                   onClick={retry}
                   className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-red-700 px-5 text-sm font-bold text-white transition-colors hover:bg-red-600"
                 >
                   <IoReloadOutline className="h-5 w-5" aria-hidden="true" />
-                  Retry
+                  Retry now
                 </button>
               </section>
             ) : displayedPdfs.length > 0 ? (

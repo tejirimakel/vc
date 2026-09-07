@@ -8,6 +8,7 @@ import {
   IoAlertCircleOutline,
   IoCalendarOutline,
   IoChevronForward,
+  IoCloudOfflineOutline,
   IoNewspaperOutline,
   IoReloadOutline,
   IoSearchOutline,
@@ -56,7 +57,8 @@ export default function NewsListPage() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const router = useRouter();
 
-  const { data, loading, error, retry } = useFetch('/api/news', {
+  const { data, loading, error, stale, retry } = useFetch('/api/news', {
+    cacheKey: 'news-feed',
     select: (body) => body.newsFeed || [],
   });
   const newsFeed = data || EMPTY;
@@ -89,7 +91,7 @@ export default function NewsListPage() {
     }
   };
 
-  if (loading) return <NewsSkeleton />;
+  if (loading && !data) return <NewsSkeleton />;
 
   return (
     <>
@@ -110,6 +112,13 @@ export default function NewsListPage() {
               {filteredNews.length} stories
             </p>
           </div>
+
+          {stale && newsFeed.length > 0 && (
+            <p className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
+              <IoCloudOfflineOutline className="h-4 w-4" aria-hidden="true" />
+              Saved copy — refreshing automatically
+            </p>
+          )}
 
           <label className="mt-5 flex h-12 items-center gap-3 rounded-full border border-black/10 bg-white px-4 shadow-sm dark:border-white/10 dark:bg-white/5">
             <IoSearchOutline className="h-5 w-5 text-red-700 dark:text-red-300" aria-hidden="true" />
@@ -145,24 +154,24 @@ export default function NewsListPage() {
             </div>
           )}
 
-          {error && (
+          {error && newsFeed.length === 0 && (
             <section className="mt-8 rounded-lg border border-red-200 bg-red-50 p-5 text-center dark:border-red-500/20 dark:bg-red-500/10">
               <IoAlertCircleOutline className="mx-auto h-10 w-10 text-red-700 dark:text-red-300" aria-hidden="true" />
               <h2 className="mt-3 text-lg font-black">Failed to load news</h2>
               <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300">
-                The newsroom feed is unavailable right now.
+                {error} Retrying automatically in the background.
               </p>
               <button
                 onClick={retry}
                 className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-red-700 px-5 text-sm font-bold text-white transition-colors hover:bg-red-600"
               >
                 <IoReloadOutline className="h-5 w-5" aria-hidden="true" />
-                Retry
+                Retry now
               </button>
             </section>
           )}
 
-          {!error && !leadStory && (
+          {!leadStory && !(error && newsFeed.length === 0) && (
             <section className="mt-8 rounded-lg border border-dashed border-black/15 bg-white/70 p-8 text-center dark:border-white/15 dark:bg-white/5">
               <IoNewspaperOutline className="mx-auto h-10 w-10 text-neutral-400" aria-hidden="true" />
               <p className="mt-3 text-sm font-semibold text-neutral-500 dark:text-neutral-400">
@@ -171,7 +180,7 @@ export default function NewsListPage() {
             </section>
           )}
 
-          {!error && leadStory && (
+          {leadStory && (
             <>
               <Link href={`/news/${leadStory.id}`} className="mt-6 block">
                 <article className="overflow-hidden rounded-lg border border-black/10 bg-white shadow-sm transition-colors hover:border-red-700/30 dark:border-white/10 dark:bg-white/5 dark:hover:border-red-300/40">

@@ -10,28 +10,25 @@ import {
   IoShieldCheckmarkOutline,
   IoWifiOutline,
 } from 'react-icons/io5';
+import { useReconnect } from '@/lib/useReconnect';
 
 export default function OfflinePage() {
   const router = useRouter();
   const [retrying, setRetrying] = useState(false);
   const [stillOffline, setStillOffline] = useState(false);
   const retryResetTimer = useRef(null);
-  const onlineDebounce = useRef(null);
 
-  // Auto-retry when connection is restored (debounced to handle flaky connections)
-  useEffect(() => {
-    const handleOnline = () => {
-      clearTimeout(onlineDebounce.current);
-      onlineDebounce.current = setTimeout(() => router.refresh(), 800);
-    };
-    window.addEventListener('online', handleOnline);
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      clearTimeout(onlineDebounce.current);
-    };
-  }, [router]);
+  // Reliably reload the moment the network is reachable again. navigator.onLine
+  // and the 'online' event are unreliable on iOS / installed PWAs, so this
+  // actively probes the network instead. A hard reload (not router.refresh)
+  // re-runs the navigation through the service worker so the real page is
+  // restored instead of a soft RSC refresh that can stick.
+  useReconnect(() => {
+    setRetrying(true);
+    window.location.reload();
+  });
 
-  // Reset retrying after 5s in case the refresh doesn't navigate away
+  // Reset retrying after 5s in case the reload doesn't navigate away
   useEffect(() => {
     if (retrying) {
       retryResetTimer.current = setTimeout(() => setRetrying(false), 5000);
@@ -40,13 +37,21 @@ export default function OfflinePage() {
   }, [retrying]);
 
   const handleRetry = () => {
-    if (navigator.onLine) {
-      setRetrying(true);
-      router.refresh();
-    } else {
-      setStillOffline(true);
-      setTimeout(() => setStillOffline(false), 3000);
-    }
+    setRetrying(true);
+    // Probe first so we don't trigger a reload that just returns offline again.
+    fetch(`/manifest.json?_probe=${Date.now()}`, { cache: 'no-store' })
+      .then((res) => {
+        if (res && res.ok) {
+          window.location.reload();
+        } else {
+          throw new Error('offline');
+        }
+      })
+      .catch(() => {
+        setRetrying(false);
+        setStillOffline(true);
+        setTimeout(() => setStillOffline(false), 3000);
+      });
   };
 
   return (
@@ -114,7 +119,9 @@ export default function OfflinePage() {
             stillOffline ? 'text-red-700 dark:text-red-300' : 'text-neutral-500 dark:text-neutral-400'
           }`}
         >
-          {stillOffline ? 'Still offline. Check your connection and try again.' : 'Reconnecting automatically when the signal returns.'}
+          {stillOffline
+            ? 'Still offline. Check your connection and try again.'
+            : 'Checking for a connection — this page reloads itself the moment you reconnect.'}
         </div>
 
         <div className="mt-10 grid w-full max-w-3xl gap-3 sm:grid-cols-3">

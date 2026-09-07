@@ -42,6 +42,32 @@ function findPostById(posts, id) {
   return posts.find((post) => String(post?.id) === String(id));
 }
 
+// WordPress fields can be either a plain string (this project's custom
+// endpoint) or a `{ rendered: string }` object (standard wp/v2). Return a
+// plain string either way so the client always receives flat fields.
+function pickRendered(value) {
+  if (value == null) return '';
+  if (typeof value === 'string') return value;
+  if (typeof value === 'object' && typeof value.rendered === 'string') {
+    return value.rendered;
+  }
+  return '';
+}
+
+function normalizePost(post) {
+  if (!post || typeof post !== 'object') return post;
+  return {
+    ...post,
+    title: pickRendered(post.title) || post.title,
+    excerpt: pickRendered(post.excerpt) || post.excerpt,
+    content: pickRendered(post.content),
+  };
+}
+
+function hasBody(post) {
+  return post ? pickRendered(post.content).trim().length > 0 : false;
+}
+
 export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');
@@ -60,14 +86,25 @@ export async function GET(req) {
         return null;
       });
 
-      if (!post) {
-        const posts = await fetchNewsFeed();
-        post = findPostById(posts, id);
+      // The custom `/custom/v1/news` endpoint's list items (and, unless a
+      // matching single-post route exists, the direct lookup above) never
+      // carry post body content — only title/excerpt/image/date/categories.
+      // Fall back to the feed item whenever we don't have a real body yet, so
+      // at minimum the excerpt is available; this cannot manufacture content
+      // the API never sends (see WORDPRESS_API_URL setup notes).
+      if (!post || !hasBody(post)) {
+        const posts = await fetchNewsFeed().catch(() => []);
+        const fromFeed = findPostById(posts, id);
+        if (hasBody(fromFeed)) {
+          post = fromFeed;
+        } else if (!post) {
+          post = fromFeed || null;
+        }
       }
 
       if (!post) return jsonResponse({ error: 'Article not found' }, 404);
 
-      return jsonResponse(post);
+      return jsonResponse(normalizePost(post));
     } catch (err) {
       console.error('News single-article error:', err);
       return jsonResponse({ error: 'Failed to fetch article' }, 500);
@@ -94,8 +131,8 @@ export async function GET(req) {
       .slice(0, 5);
 
     return jsonResponse({
-      newsFeed: sorted.slice(0, 10),
-      trendingNews: trending.length ? trending : sorted.slice(0, 5),
+      newsFeed: sorted.slice(0, 10).map(normalizePost),
+      trendingNews: (trending.length ? trending : sorted.slice(0, 5)).map(normalizePost),
       categories,
       lastUpdated: new Date().toISOString(),
     });
