@@ -326,39 +326,3 @@ When adding a new third-party origin (an image host, an API, an embed), update t
 `dependabot.yml` opens weekly grouped PRs (Mondays 06:00 Africa/Lagos) for npm packages and GitHub Actions.
 
 Lighthouse CI can use an optional `LHCI_GITHUB_APP_TOKEN` secret for status checks.
-
-## Known gaps
-
-Things a new contributor should know before trusting what they see.
-
-### Access and security
-
-- The access gate is not authentication (see [The access gate](#the-access-gate)). There is no rate limiting on `/api/pwa/access`.
-- The CSP allows `'unsafe-inline'` and `'unsafe-eval'` for scripts.
-- `/api/pwa/revalidate` accepts any tags and paths once the secret matches, with no allowlist or size limit.
-- `/api/pdf` does not check the upstream content type, cap the response size, or time out.
-
-### CI
-
-- Lighthouse audits `/news` and `/ecopy` without an access cookie, so both runs follow the redirect and measure the landing page instead.
-
-### Dead or stale code
-
-- Six tracked files with a "2" suffix are older copies and are not used by Next.js: `app/page 2.js`, `app/mobile/page 2.js`, `app/ecopy/page 2.js`, `app/ecopy/[id]/page 2.js`, `app/news/[id]/page 2.js`, and `components/protectedRoutes 2.js` (the previous `localStorage` gate).
-- In `public/sw.js`, the stale-while-revalidate branch for `/api/*` and the cache-first branch for `/api/pdf` cannot be reached, because the protected API check runs first.
-- Not referenced anywhere: `components/PdfViewerComponent.js`, `useAppReady()`, `revalidatePWA()` in `app/actions.ts`, `public/offline.html`, `public/pdf.worker.min.mjs`, and the images `25.png`, `27.png` and `28.PNG` (about 14 MB together).
-- Dependencies with no imports in the source: `@headlessui/react`, `@reduxjs/toolkit`, `react-redux`, `react-tabs`, `@vercel/analytics`.
-
-### Tooling
-
-- `npm run analyze` calls `cross-env`, which is not installed, and `next.config.js` has no bundle analyzer wired up.
-- `next lint` is deprecated and is removed in Next.js 16.
-- `eslint-config-next` is pinned at 15.2.2 while `next` is on 15.5.
-- `public/pdf.worker.js` is a manual copy and must match the `pdfjs-dist` version bundled inside `react-pdf` (4.8.69 today). Re-copy it whenever `react-pdf` is upgraded, or the reader will fail to load documents.
-
-### Behaviour
-
-- Offline pages say "Saved pages can still open", but app pages are never cached.
-- `/video` and `/stream` still use an older visual style than the other app pages, and `/video` has no retry button.
-- `/api/news` returns only the first 10 posts, so "View all" on `/news` shows the same 10 stories as the home screen.
-- The installed-app cookies written by `components/prompt.js` are marked `Secure`, so they are not stored on plain `http://` origins other than `localhost`.
