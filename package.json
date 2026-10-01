@@ -39,6 +39,6 @@
     "wait-on": "^9.0.10"
   },
   "overrides": {
-    "postcss": "8.5.15"
+    "postcss": "8.5.28"
   }
 }
