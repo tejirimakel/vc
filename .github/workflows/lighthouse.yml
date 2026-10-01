@@ -11,18 +11,25 @@ on:
 
 permissions:
   contents: read
-  pull-requests: write
+
+concurrency:
+  group: lighthouse-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   lighthouse:
     name: Lighthouse Audit
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -36,7 +43,7 @@ jobs:
           NODE_ENV: production
 
       - name: Install Lighthouse CI
-        run: npm install -g @lhci/cli@0.14.x
+        run: npm install -g @lhci/cli@0.15.x
 
       - name: Start production server
         run: npm start &
@@ -54,7 +61,7 @@ jobs:
           LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
       - name: Upload Lighthouse results
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: lighthouse-results
@@ -62,8 +69,8 @@ jobs:
           retention-days: 30
 
       - name: Parse and comment results
-        if: github.event_name == 'pull_request' && always()
-        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && always()
+        uses: actions/github-script@v9
         with:
           script: |
             const fs = require('fs');
@@ -84,7 +91,7 @@ jobs:
             const bp = score('best-practices');
             const seo = score('seo');
             const body = [
-              '## :lighthouse: Lighthouse Report',
+              '## :bar_chart: Lighthouse Report',
               '',
               '| Category | Score | Status |',
               '|----------|-------|--------|',
@@ -108,7 +115,7 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
             });
-            const existing = comments.find(c => c.body.includes(':lighthouse: Lighthouse Report'));
+            const existing = comments.find(c => c.body.includes(':bar_chart: Lighthouse Report'));
             if (existing) {
               await github.rest.issues.updateComment({
                 comment_id: existing.id,
