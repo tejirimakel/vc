@@ -7,6 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "clean": "rm -rf .next node_modules/ .cache",
     "analyze": "cross-env ANALYZE=true next build"
   },
@@ -26,12 +28,16 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4.1.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.3",
     "@types/node": "^25.0.3",
     "@types/react": "^19.2.7",
     "eslint": "^9",
     "eslint-config-next": "15.2.2",
+    "jsdom": "^26.1.0",
     "tailwindcss": "^4.1.1",
     "typescript": "^5.9.3",
+    "vitest": "^3.2.7",
     "wait-on": "^9.0.10"
   },
   "overrides": {
