@@ -40,13 +40,11 @@ Requires Node 22 (the version CI uses) and npm.
 
 ```bash
 npm install
-cp .env.local   # then fill in the values
+cp .env.example .env.local   # then fill in the values
 npm run dev
 ```
 
 Open <http://localhost:3000>. You will see the landing page.
-
-Create `.env.local` by hand from the table below in that case.
 
 ### Seeing the app pages locally
 
