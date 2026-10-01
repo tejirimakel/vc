@@ -36,5 +36,8 @@ afterEach(() => {
   sessionStorage.clear();
   vi.unstubAllGlobals();
   vi.restoreAllMocks();
+  // restoreAllMocks no longer resets vi.fn() history in Vitest 3; clear it so
+  // the shared router mock does not carry calls between tests.
+  vi.clearAllMocks();
   vi.useRealTimers();
 });
