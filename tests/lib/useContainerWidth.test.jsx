@@ -73,6 +73,26 @@ describe('useContainerWidth', () => {
     expect(screen.getByTestId('box')).toHaveTextContent('592');
   });
 
+  it('restarts the wait on every resize', () => {
+    render(<Probe />);
+    fire(500);
+
+    fire(550);
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+    fire(603);
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+    expect(screen.getByTestId('box')).toHaveTextContent('496');
+
+    act(() => {
+      vi.advanceTimersByTime(50);
+    });
+    expect(screen.getByTestId('box')).toHaveTextContent('592');
+  });
+
   it('caps the width at 820 before rounding', () => {
     render(<Probe />);
 
