@@ -8,11 +8,17 @@ export default function SplashScreen() {
   const [fading, setFading] = useState(false);
 
   useEffect(() => {
-    if (sessionStorage.getItem('splashShown')) return;
     if (!isInstalledPwa()) return;
 
+    try {
+      if (sessionStorage.getItem('splashShown')) return;
+      sessionStorage.setItem('splashShown', 'true');
+    } catch {
+      // Storage is blocked. Skip the splash; otherwise it would show on every navigation.
+      return;
+    }
+
     setVisible(true);
-    sessionStorage.setItem('splashShown', 'true');
 
     const fadeTimer = setTimeout(() => setFading(true), 1800);
     const hideTimer = setTimeout(() => setVisible(false), 2400);
