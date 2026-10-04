@@ -87,6 +87,7 @@ describe('StreamPage', () => {
     render(<StreamPage />);
     await waitFor(() => expect(instances).toHaveLength(1));
 
+    instances[0].levels = [{}];
     emitError(instances[0], { fatal: true, type: 'networkError' });
 
     expect(instances[0].startLoad).toHaveBeenCalledTimes(1);
@@ -141,16 +142,25 @@ describe('StreamPage', () => {
     expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
   });
 
-  it('does not create a player if the page unmounts while hls.js is loading', async () => {
+  it('fails visibly on a fatal manifest error without trying to recover', async () => {
     stubFetch(okResponse);
-    const { container, unmount } = render(<StreamPage />);
+    render(<StreamPage />);
+    await waitFor(() => expect(instances).toHaveLength(1));
+
+    emitError(instances[0], { fatal: true, type: 'networkError', details: 'manifestLoadError' });
+
+    expect(instances[0].startLoad).not.toHaveBeenCalled();
+    expect(screen.getByText('Stream error. Please retry.')).toBeInTheDocument();
+  });
+
+  it('shows an error with retry when native playback fails', async () => {
+    stubFetch({ ok: true, status: 200, json: async () => ({ url: 'https://example.com/live.mp4' }) });
+    const { container } = render(<StreamPage />);
     await waitFor(() => expect(container.querySelector('video')).not.toBeNull());
 
-    unmount();
-    await act(async () => {
-      await Promise.resolve();
-    });
+    fireEvent.error(container.querySelector('video'));
 
-    expect(instances.every((instance) => instance.destroy.mock.calls.length > 0)).toBe(true);
+    expect(screen.getByText('Stream error. Please retry.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
   });
 });

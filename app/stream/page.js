@@ -85,7 +85,7 @@ export default function StreamPage() {
         hls.on(Hls.Events.ERROR, (_, data) => {
           if (!data.fatal) return;
           // Try each recoverable error type once before giving up.
-          if (data.type === Hls.ErrorTypes.NETWORK_ERROR && !networkRecovered) {
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR && !networkRecovered && hls.levels?.length) {
             networkRecovered = true;
             hls.startLoad();
             return;
@@ -162,6 +162,7 @@ export default function StreamPage() {
               </p>
               <video
                 ref={videoRef}
+                onError={() => setError('Stream error. Please retry.')}
                 controls
                 autoPlay
                 playsInline
