@@ -237,13 +237,13 @@ export default function MobileHome() {
               </div>
 
               {searchQuery.trim() && (
-                <p className="mt-3 inline-flex items-center gap-2 rounded-full border border-black/10 bg-white py-1 pl-3 pr-1 text-xs font-bold text-neutral-700 shadow-sm dark:border-white/10 dark:bg-white/10 dark:text-neutral-200">
-                  <span>Search: {searchQuery.trim()}</span>
+                <p className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full border border-black/10 bg-white py-1 pl-3 pr-1 text-xs font-bold text-neutral-700 shadow-sm dark:border-white/10 dark:bg-white/10 dark:text-neutral-200">
+                  <span className="min-w-0 truncate" title={searchQuery.trim()}>Search: {searchQuery.trim()}</span>
                   <button
                     type="button"
                     onClick={() => setSearchQuery("")}
                     aria-label="Clear search filter"
-                    className="inline-flex h-7 w-7 items-center justify-center rounded-full transition-colors hover:bg-neutral-100 dark:hover:bg-white/10"
+                    className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-neutral-100 dark:hover:bg-white/10"
                   >
                     <IoCloseOutline className="h-4 w-4" aria-hidden="true" />
                   </button>
