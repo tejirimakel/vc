@@ -9,6 +9,7 @@ import { MdOutlineFeed } from "react-icons/md";
 import {
   IoAlertCircleOutline,
   IoChevronForward,
+  IoCloseOutline,
   IoNewspaperOutline,
   IoReloadOutline,
   IoSearchOutline,
@@ -213,7 +214,7 @@ export default function MobileHome() {
                       }`}
                     >
                       <MdOutlineFeed className="h-4 w-4" aria-hidden="true" />
-                      {category.split(" ")[0]}
+                      {category}
                     </button>
                   );
                 })}
@@ -234,6 +235,20 @@ export default function MobileHome() {
                   <IoChevronForward className="h-4 w-4" aria-hidden="true" />
                 </Link>
               </div>
+
+              {searchQuery.trim() && (
+                <p className="mt-3 inline-flex items-center gap-2 rounded-full border border-black/10 bg-white py-1 pl-3 pr-1 text-xs font-bold text-neutral-700 shadow-sm dark:border-white/10 dark:bg-white/10 dark:text-neutral-200">
+                  <span>Search: {searchQuery.trim()}</span>
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    aria-label="Clear search filter"
+                    className="inline-flex h-7 w-7 items-center justify-center rounded-full transition-colors hover:bg-neutral-100 dark:hover:bg-white/10"
+                  >
+                    <IoCloseOutline className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                </p>
+              )}
 
               <ul className="mt-3 space-y-3">
                 {filteredNews.length > 0 ? (
