@@ -1,79 +1,117 @@
 'use client';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Navbar from '@/components/nav';
 import { useRouter } from 'next/navigation';
+
+// Detect HLS by the URL pathname, not a substring match — signed/query
+// params (…/live.m3u8?token=…) and lookalikes shouldn't fool detection.
+function isHlsUrl(streamUrl) {
+  try {
+    return new URL(streamUrl, window.location.href).pathname.toLowerCase().endsWith('.m3u8');
+  } catch {
+    return streamUrl.toLowerCase().includes('.m3u8');
+  }
+}
 
 export default function StreamPage() {
   const [streamUrl, setStreamUrl] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  // 503 from /api/stream means no stream is configured: an expected state, not an error.
+  const [unavailable, setUnavailable] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const videoRef = useRef(null);
-  const hlsRef = useRef(null);
   const router = useRouter();
 
-  const loadStream = useCallback(() => {
+  useEffect(() => {
+    let ignore = false;
     setLoading(true);
     setError(null);
+    setUnavailable(false);
+
     fetch('/api/stream')
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.error) setError(data.error);
+      .then(async (response) => {
+        if (response.status === 503) {
+          if (!ignore) setUnavailable(true);
+          return;
+        }
+        const data = await response.json();
+        if (ignore) return;
+        if (!response.ok || data.error) setError(data.error || 'Could not load stream');
         else setStreamUrl(data.url);
       })
-      .catch(() => setError('Could not load stream'))
-      .finally(() => setLoading(false));
-  }, []);
+      .catch(() => {
+        if (!ignore) setError('Could not load stream');
+      })
+      .finally(() => {
+        if (!ignore) setLoading(false);
+      });
 
+    return () => {
+      ignore = true;
+    };
+  }, [attempt]);
+
+  const showPlayer = !loading && !error && !unavailable && Boolean(streamUrl);
+
+  // Depends on showPlayer so it re-runs whenever the <video> element is
+  // (re)mounted — including after a retry that returns the same URL.
   useEffect(() => {
-    loadStream();
-  }, [loadStream]);
-
-  useEffect(() => {
-    if (!streamUrl || !videoRef.current) return;
-
     const video = videoRef.current;
-    // Detect HLS by the URL pathname, not a substring match — signed/query
-    // params (…/live.m3u8?token=…) and lookalikes shouldn't fool detection.
-    let isHls = false;
-    try {
-      isHls = new URL(streamUrl, window.location.href).pathname
-        .toLowerCase()
-        .endsWith('.m3u8');
-    } catch {
-      isHls = streamUrl.toLowerCase().includes('.m3u8');
+    if (!showPlayer || !video) return undefined;
+
+    // Plain files, and Safari (native HLS), play straight from the URL.
+    if (!isHlsUrl(streamUrl) || video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = streamUrl;
+      return undefined;
     }
 
-    if (!isHls) {
-      video.src = streamUrl;
-      return;
-    }
+    let cancelled = false;
+    let hls = null;
+    let networkRecovered = false;
+    let mediaRecovered = false;
 
-    if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      // Safari supports HLS natively
-      video.src = streamUrl;
-    } else {
-      import('hls.js').then(({ default: Hls }) => {
+    import('hls.js')
+      .then(({ default: Hls }) => {
+        if (cancelled) return;
         if (!Hls.isSupported()) {
           setError('Live streaming is not supported in this browser.');
           return;
         }
-        const hls = new Hls();
-        hlsRef.current = hls;
+
+        hls = new Hls();
         hls.loadSource(streamUrl);
         hls.attachMedia(video);
         hls.on(Hls.Events.ERROR, (_, data) => {
-          if (data.fatal) setError('Stream error. Please retry.');
+          if (!data.fatal) return;
+          // Try each recoverable error type once before giving up.
+          if (data.type === Hls.ErrorTypes.NETWORK_ERROR && !networkRecovered) {
+            networkRecovered = true;
+            hls.startLoad();
+            return;
+          }
+          if (data.type === Hls.ErrorTypes.MEDIA_ERROR && !mediaRecovered) {
+            mediaRecovered = true;
+            hls.recoverMediaError();
+            return;
+          }
+          setError('Stream error. Please retry.');
         });
+      })
+      .catch(() => {
+        if (!cancelled) setError('Could not load the video player.');
       });
-    }
 
     return () => {
-      if (hlsRef.current) {
-        hlsRef.current.destroy();
-        hlsRef.current = null;
+      cancelled = true;
+      if (hls) {
+        hls.destroy();
+        hls = null;
       }
     };
-  }, [streamUrl]);
+  }, [showPlayer, streamUrl]);
+
+  const retry = () => setAttempt((count) => count + 1);
 
   return (
     <>
@@ -94,12 +132,22 @@ export default function StreamPage() {
             <div className="animate-pulse bg-neutral-200 dark:bg-neutral-800 rounded-lg w-full aspect-video" />
           )}
 
-          {!loading && error && (
+          {!loading && unavailable && (
             <div className="rounded-lg bg-neutral-100 dark:bg-neutral-900 p-10 text-center">
+              <p className="text-lg dark:text-neutral-300 font-semibold">No live broadcast right now</p>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-2">
+                Check back later for live coverage.
+              </p>
+            </div>
+          )}
+
+          {!loading && error && (
+            <div role="alert" className="rounded-lg bg-neutral-100 dark:bg-neutral-900 p-10 text-center">
               <p className="text-lg dark:text-neutral-300 font-semibold">Stream Unavailable</p>
-              <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-2">{error}</p>
+              <p className="text-sm text-neutral-600 dark:text-neutral-400 mt-2">{error}</p>
               <button
-                onClick={loadStream}
+                type="button"
+                onClick={retry}
                 className="mt-6 px-6 py-2 bg-red-700 text-white rounded-full text-sm"
               >
                 Retry
@@ -107,9 +155,9 @@ export default function StreamPage() {
             </div>
           )}
 
-          {!loading && streamUrl && (
+          {showPlayer && (
             <>
-              <p className="text-xs text-neutral-400 text-center mb-2">
+              <p className="text-xs text-neutral-600 dark:text-neutral-400 text-center mb-2">
                 Rotate device for best experience
               </p>
               <video
