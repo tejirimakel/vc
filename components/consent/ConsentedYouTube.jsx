@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import { IoPlayCircle, IoLogoYoutube } from 'react-icons/io5';
 import { useConsent } from './ConsentProvider';
@@ -9,16 +9,11 @@ import { useConsent } from './ConsentProvider';
 // Until the visitor plays, no request to youtube.com is made (privacy + TTI win).
 // On play: if media consent is granted, the player loads directly; otherwise we
 // surface a brief two-click notice before loading the third-party iframe.
+// Callers must pass key={videoId} so that switching videos starts from the facade.
 export default function ConsentedYouTube({ videoId, title, poster }) {
   const { status, accept } = useConsent();
   const [loaded, setLoaded] = useState(false);
   const [confirming, setConfirming] = useState(false);
-
-  // Reset to the facade whenever the selected video changes.
-  useEffect(() => {
-    setLoaded(false);
-    setConfirming(false);
-  }, [videoId]);
 
   if (!videoId) return null;
 

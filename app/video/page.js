@@ -208,6 +208,7 @@ export default function Videos() {
                 <div className="overflow-hidden rounded-lg border border-black/10 bg-white shadow-sm dark:border-white/10 dark:bg-white/5">
                   <div className="relative aspect-video bg-black">
                     <ConsentedYouTube
+                      key={selectedVideo.id}
                       videoId={selectedVideo.id}
                       title={selectedVideo.title}
                       poster={getThumbnail(selectedVideo)}
@@ -219,11 +220,15 @@ export default function Videos() {
                         <IoCalendarClearOutline className="h-4 w-4 text-red-700 dark:text-red-300" aria-hidden="true" />
                         {formatDate(selectedVideo.published, DATE_OPTIONS)}
                       </span>
-                      <span className="h-1 w-1 rounded-full bg-neutral-300 dark:bg-neutral-700" aria-hidden="true" />
-                      <span className="inline-flex items-center gap-1">
-                        <IoTimeOutline className="h-4 w-4 text-red-700 dark:text-red-300" aria-hidden="true" />
-                        Latest episode
-                      </span>
+                      {selectedVideo.id === videos[0]?.id && (
+                        <>
+                          <span className="h-1 w-1 rounded-full bg-neutral-300 dark:bg-neutral-700" aria-hidden="true" />
+                          <span className="inline-flex items-center gap-1">
+                            <IoTimeOutline className="h-4 w-4 text-red-700 dark:text-red-300" aria-hidden="true" />
+                            Latest episode
+                          </span>
+                        </>
+                      )}
                     </div>
                     <h2 className="mt-3 text-2xl font-black leading-tight sm:text-3xl">
                       {cleanText(selectedVideo.title)}
