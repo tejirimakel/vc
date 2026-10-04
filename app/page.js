@@ -15,6 +15,9 @@ import {
   IoShieldCheckmarkOutline,
 } from "react-icons/io5"
 
+// Regenerate daily so the footer year never goes stale between deploys.
+export const revalidate = 86400
+
 const appSurfaces = [
   {
     icon: IoNewspaperOutline,

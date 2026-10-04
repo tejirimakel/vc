@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { IoArrowBackOutline } from "react-icons/io5";
 
+// Regenerate daily so the footer year never goes stale between deploys.
+export const revalidate = 86400;
+
 // Shared chrome for all legal pages (privacy, terms, cookies, editorial, etc.).
 // These routes are public — they are intentionally absent from middleware.js's
 // matcher so they remain reachable without the app-access cookie.
