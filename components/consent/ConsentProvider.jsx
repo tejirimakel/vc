@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 
 // Single non-essential consent bucket (third-party media + any future analytics).
 // Strictly-necessary cookies (e.g. tvc_pwa_access) are never gated by this.
@@ -46,11 +46,12 @@ export function ConsentProvider({ children }) {
   const reject = useCallback(() => persist('rejected'), [persist]);
   const reset = useCallback(() => persist(null), [persist]);
 
-  return (
-    <ConsentContext.Provider value={{ status, ready, accept, reject, reset }}>
-      {children}
-    </ConsentContext.Provider>
+  const value = useMemo(
+    () => ({ status, ready, accept, reject, reset }),
+    [status, ready, accept, reject, reset]
   );
+
+  return <ConsentContext.Provider value={value}>{children}</ConsentContext.Provider>;
 }
 
 export function useConsent() {
