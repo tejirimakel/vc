@@ -163,4 +163,18 @@ describe('StreamPage', () => {
     expect(screen.getByText('Stream error. Please retry.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Retry' })).toBeInTheDocument();
   });
+
+  it('does not treat a video element error as fatal on the hls.js path', async () => {
+    stubFetch(okResponse);
+    const { container } = render(<StreamPage />);
+    await waitFor(() => expect(instances).toHaveLength(1));
+
+    fireEvent.error(container.querySelector('video'));
+
+    expect(screen.queryByText('Stream error. Please retry.')).toBeNull();
+
+    emitError(instances[0], { fatal: true, type: 'mediaError' });
+
+    expect(instances[0].recoverMediaError).toHaveBeenCalledTimes(1);
+  });
 });

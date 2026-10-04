@@ -62,8 +62,10 @@ export default function StreamPage() {
 
     // Plain files, and Safari (native HLS), play straight from the URL.
     if (!isHlsUrl(streamUrl) || video.canPlayType('application/vnd.apple.mpegurl')) {
+      const onNativeError = () => setError('Stream error. Please retry.');
+      video.addEventListener('error', onNativeError);
       video.src = streamUrl;
-      return undefined;
+      return () => video.removeEventListener('error', onNativeError);
     }
 
     let cancelled = false;
@@ -162,7 +164,6 @@ export default function StreamPage() {
               </p>
               <video
                 ref={videoRef}
-                onError={() => setError('Stream error. Please retry.')}
                 controls
                 autoPlay
                 playsInline
