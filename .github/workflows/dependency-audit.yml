@@ -17,19 +17,25 @@ on:
 
 permissions:
   contents: read
-  issues: write
-  pull-requests: write
+
+concurrency:
+  group: dependency-audit-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   audit:
     name: npm audit
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -40,25 +46,28 @@ jobs:
       - name: Run npm audit (moderate+)
         id: audit
         run: |
-          # Keep stderr OUT of the JSON file — npm warnings on stderr would
-          # corrupt it and break jq + the JSON.parse in the comment step.
-          npm audit --audit-level=moderate --json > audit-report.json 2>/dev/null || true
+          npm audit --audit-level=moderate --json > audit-report.json || true
           VULN_COUNT=$(jq '.metadata.vulnerabilities | (.moderate // 0) + (.high // 0) + (.critical // 0)' audit-report.json)
-          echo "vuln_count=$VULN_COUNT" >> $GITHUB_OUTPUT
-          echo "### npm Audit Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          npm audit --audit-level=moderate 2>&1 | tail -20 >> $GITHUB_STEP_SUMMARY || true
+          echo "vuln_count=$VULN_COUNT" >> "$GITHUB_OUTPUT"
+          {
+            echo "### npm Audit Results"
+            echo ""
+            echo '```'
+            npm audit --audit-level=moderate 2>&1 | tail -20 || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload audit report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
+        if: always()
         with:
           name: npm-audit-report
           path: audit-report.json
           retention-days: 30
 
       - name: Comment on PR
-        if: github.event_name == 'pull_request' && steps.audit.outputs.vuln_count != '0'
-        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && steps.audit.outputs.vuln_count != '0'
+        uses: actions/github-script@v9
         with:
           script: |
             const fs = require('fs');
@@ -76,7 +85,7 @@ jobs:
               '',
               'Run `npm audit fix` locally to resolve auto-fixable issues.',
             ].join('\n');
-            github.rest.issues.createComment({
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -89,13 +98,17 @@ jobs:
   outdated:
     name: Check outdated packages
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
@@ -106,20 +119,22 @@ jobs:
       - name: Check for outdated packages
         id: outdated
         run: |
-          # `npm outdated --json` exits 1 when anything is outdated but still
-          # prints valid JSON to stdout (and "{}" when nothing is outdated).
-          # Capture stdout directly to the file; do NOT append `|| echo '{}'`,
-          # which would produce two concatenated JSON values and break jq +
-          # JSON.parse in the issue step.
+          # npm outdated exits 1 when anything is outdated, so don't fail on it
           npm outdated --json > outdated-report.json 2>/dev/null || true
+          [ -s outdated-report.json ] || echo '{}' > outdated-report.json
           COUNT=$(jq 'keys | length' outdated-report.json)
-          echo "outdated_count=$COUNT" >> $GITHUB_OUTPUT
-          echo "### Outdated Packages ($COUNT)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          npm outdated 2>/dev/null >> $GITHUB_STEP_SUMMARY || true
+          echo "outdated_count=$COUNT" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Outdated Packages ($COUNT)"
+            echo ""
+            echo '```'
+            npm outdated 2>/dev/null || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload outdated report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
+        if: always()
         with:
           name: outdated-packages-report
           path: outdated-report.json
@@ -127,7 +142,7 @@ jobs:
 
       - name: Open issue if packages are outdated
         if: steps.outdated.outputs.outdated_count != '0'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const fs = require('fs');
