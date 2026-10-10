@@ -1,10 +1,9 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { decode } from 'he';
 import {
   IoAlertCircleOutline,
   IoCalendarOutline,
@@ -15,39 +14,17 @@ import {
 } from 'react-icons/io5';
 import Navbar from '@/components/nav';
 import NavButtons from '@/components/navButtons';
-import ProtectedRoutes from '@/components/protectedRoutes';
+import { cleanText, cutTitle, makeExcerpt } from '@/lib/text';
+import { formatDate } from '@/lib/format';
+import { useFetch } from '@/lib/useFetch';
 
-const cleanText = (value = '') =>
-  decode(String(value))
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-
-const cutTitle = (value, limit = 16) => {
-  const words = cleanText(value).split(' ');
-  return words.slice(0, limit).join(' ') + (words.length > limit ? '...' : '');
-};
-
-const makeExcerpt = (value) => {
-  const words = cleanText(value).split(' ').filter(Boolean);
-  if (!words.length) return 'Read the full update from TheValueChain.';
-  return words.slice(0, 16).join(' ') + (words.length > 20 ? '...' : '');
-};
-
-const formatDate = (dateString) => {
-  if (!dateString) return 'Latest';
-  const date = new Date(dateString);
-  if (Number.isNaN(date.getTime())) return 'Latest';
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(date);
-};
+const DATE_OPTIONS = { year: 'numeric', month: 'short', day: 'numeric' };
+const EXCERPT_OPTIONS = { words: 16, fallback: 'Read the full update from TheValueChain.' };
+const EMPTY = [];
 
 function NewsSkeleton() {
   return (
-    <ProtectedRoutes>
+    <>
       <div className="min-h-screen bg-[#f5f7fb] text-neutral-950 dark:bg-[#07080c] dark:text-neutral-50">
         <div className="fixed left-0 top-0 z-50 h-16 w-full border-b border-black/10 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-[#090b10]/90" />
         <main className="mx-auto max-w-3xl px-4 pb-28 pt-24 animate-pulse">
@@ -70,32 +47,19 @@ function NewsSkeleton() {
         </main>
         <Navbar />
       </div>
-    </ProtectedRoutes>
+    </>
   );
 }
 
 export default function NewsListPage() {
-  const [newsFeed, setNewsFeed] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [query, setQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
-  const [retryCount, setRetryCount] = useState(0);
   const router = useRouter();
 
-  useEffect(() => {
-    setLoading(true);
-    setError(null);
-
-    fetch('/api/news')
-      .then((response) => {
-        if (!response.ok) throw new Error(`Server error ${response.status}`);
-        return response.json();
-      })
-      .then((data) => setNewsFeed(data.newsFeed || []))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [retryCount]);
+  const { data, loading, error, retry } = useFetch('/api/news', {
+    select: (body) => body.newsFeed || [],
+  });
+  const newsFeed = data || EMPTY;
 
   const categories = useMemo(() => {
     const labels = newsFeed.flatMap((item) =>
@@ -128,7 +92,7 @@ export default function NewsListPage() {
   if (loading) return <NewsSkeleton />;
 
   return (
-    <ProtectedRoutes>
+    <>
       <div className="min-h-screen bg-[#f5f7fb] text-neutral-950 dark:bg-[#07080c] dark:text-neutral-50">
         <nav className="fixed left-0 top-0 z-50 w-full border-b border-black/10 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-[#090b10]/90">
           <NavButtons onBack={() => router.back()} onShare={handleShare} title="Latest News" />
@@ -189,7 +153,7 @@ export default function NewsListPage() {
                 The newsroom feed is unavailable right now.
               </p>
               <button
-                onClick={() => setRetryCount((count) => count + 1)}
+                onClick={retry}
                 className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-red-700 px-5 text-sm font-bold text-white transition-colors hover:bg-red-600"
               >
                 <IoReloadOutline className="h-5 w-5" aria-hidden="true" />
@@ -227,12 +191,12 @@ export default function NewsListPage() {
                   <div className="p-4">
                     <h2 className="text-2xl font-black leading-tight">{cutTitle(leadStory.title, 18)}</h2>
                     <p className="mt-3 text-sm leading-6 text-neutral-600 dark:text-neutral-300">
-                      {makeExcerpt(leadStory.excerpt)}
+                      {makeExcerpt(leadStory.excerpt, EXCERPT_OPTIONS)}
                     </p>
                     <div className="mt-4 flex items-center justify-between text-xs font-bold text-neutral-500 dark:text-neutral-400">
                       <span className="inline-flex items-center gap-1">
                         <IoCalendarOutline className="h-4 w-4" aria-hidden="true" />
-                        {formatDate(leadStory.date)}
+                        {formatDate(leadStory.date, DATE_OPTIONS)}
                       </span>
                       <span className="inline-flex items-center gap-1 text-red-700 dark:text-red-300">
                         Read
@@ -259,13 +223,13 @@ export default function NewsListPage() {
                         sizes="128px"
                       />
                       <div className="min-w-0 flex-1">
-                        <h3 className="text-sm font-bold leading-5">{cutTitle(news.title)}</h3>
+                        <h3 className="text-sm font-bold leading-5">{cutTitle(news.title, 16)}</h3>
                         <p className="mt-2 text-xs leading-5 text-neutral-600 dark:text-neutral-300">
-                          {makeExcerpt(news.excerpt)}
+                          {makeExcerpt(news.excerpt, EXCERPT_OPTIONS)}
                         </p>
                         <p className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-neutral-500 dark:text-neutral-400">
                           <IoCalendarOutline className="h-4 w-4" aria-hidden="true" />
-                          {formatDate(news.date)}
+                          {formatDate(news.date, DATE_OPTIONS)}
                         </p>
                       </div>
                     </Link>
@@ -278,6 +242,6 @@ export default function NewsListPage() {
 
         <Navbar />
       </div>
-    </ProtectedRoutes>
+    </>
   );
 }

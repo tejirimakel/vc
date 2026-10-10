@@ -1,4 +1,5 @@
 import Image from "next/image"
+import Link from "next/link"
 import InstallPrompt from "@/components/prompt"
 import MobileRedirect from "@/components/mobileRed"
 import OpenAppButton from "@/components/OpenAppBtn"
@@ -13,6 +14,9 @@ import {
   IoPlayCircleOutline,
   IoShieldCheckmarkOutline,
 } from "react-icons/io5"
+
+// Regenerate daily so the footer year never goes stale between deploys.
+export const revalidate = 86400
 
 const appSurfaces = [
   {
@@ -45,7 +49,7 @@ export default function Home() {
 
       <section className="relative isolate flex min-h-[86vh] overflow-hidden bg-[#080910] px-5 py-7 text-white sm:min-h-[82vh] sm:px-8">
         <Image
-          src="/2.png"
+          src="/2.webp"
           alt="TheValueChain app interface"
           fill
           priority
@@ -92,12 +96,12 @@ export default function Home() {
           <div className="hidden md:flex md:justify-end">
             <div className="relative w-full max-w-[18rem] overflow-hidden rounded-lg border border-white/15 bg-black shadow-[0_24px_80px_rgba(0,0,0,0.42)]">
               <Image
-                src="/26.png"
+                src="/26.webp"
                 alt="TheValueChain mobile news feed"
                 width={782}
                 height={1692}
                 className="h-auto w-full"
-                priority
+                loading="lazy"
               />
             </div>
           </div>
@@ -176,6 +180,14 @@ export default function Home() {
       <InstallPrompt />
 
       <footer className="px-5 py-8 text-center text-xs font-medium text-neutral-500 dark:text-neutral-400">
+        <nav className="mb-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+          <Link href="/privacy" className="hover:text-red-700 dark:hover:text-red-400">Privacy</Link>
+          <Link href="/terms" className="hover:text-red-700 dark:hover:text-red-400">Terms</Link>
+          <Link href="/cookies" className="hover:text-red-700 dark:hover:text-red-400">Cookies</Link>
+          <Link href="/editorial" className="hover:text-red-700 dark:hover:text-red-400">Editorial</Link>
+          <Link href="/copyright" className="hover:text-red-700 dark:hover:text-red-400">Copyright</Link>
+          <Link href="/about" className="hover:text-red-700 dark:hover:text-red-400">About</Link>
+        </nav>
         © <CurrentYear /> TheValueChain. All rights reserved.
       </footer>
     </main>

@@ -14,18 +14,11 @@ import {
 } from "react-icons/io5";
 import { BsFiletypePdf } from "react-icons/bs";
 import Link from "next/link";
-import ProtectedRoutes from "@/components/protectedRoutes";
+import { formatDate } from "@/lib/format";
+import { useFetch } from "@/lib/useFetch";
 
-const formatDate = (dateString) => {
-  if (!dateString) return "Latest edition";
-  const date = new Date(dateString);
-  if (Number.isNaN(date.getTime())) return "Latest edition";
-  return new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(date);
-};
+const DATE_OPTIONS = { year: "numeric", month: "short", day: "numeric" };
+const EMPTY = [];
 
 function PdfCard({ pdf }) {
   return (
@@ -40,7 +33,7 @@ function PdfCard({ pdf }) {
           </p>
           <p className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-neutral-500 dark:text-neutral-400">
             <IoCalendarOutline className="h-4 w-4" aria-hidden="true" />
-            {formatDate(pdf.date)}
+            {formatDate(pdf.date, DATE_OPTIONS, "Latest edition")}
           </p>
         </div>
       </div>
@@ -71,34 +64,15 @@ function PdfSkeleton() {
 }
 
 export default function PdfPage() {
-  const [pdfs, setPdfs] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [query, setQuery] = useState("");
-  const [retryCount, setRetryCount] = useState(0);
   const pdfsPerPage = 6;
   const router = useRouter();
 
-  useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const response = await fetch("/api/ecopy");
-        if (!response.ok) throw new Error("Failed to fetch PDFs");
-        const data = await response.json();
-        setPdfs(data.pdfs || []);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchData();
-  }, [retryCount]);
+  const { data, loading, error, retry } = useFetch("/api/ecopy", {
+    select: (body) => body.pdfs || [],
+  });
+  const pdfs = data || EMPTY;
 
   useEffect(() => {
     setCurrentPage(1);
@@ -118,7 +92,7 @@ export default function PdfPage() {
   const displayedPdfs = filteredPdfs.slice(startIndex, startIndex + pdfsPerPage);
 
   return (
-    <ProtectedRoutes>
+    <>
       <div className="min-h-screen bg-[#f5f7fb] text-neutral-950 dark:bg-[#07080c] dark:text-neutral-50">
         <nav className="fixed left-0 top-0 z-50 w-full border-b border-black/10 bg-white/90 backdrop-blur dark:border-white/10 dark:bg-[#090b10]/90">
           <div className="mx-auto flex max-w-4xl items-center justify-between px-4 py-3">
@@ -170,7 +144,7 @@ export default function PdfPage() {
                 <h2 className="mt-3 text-lg font-black">Could not load editions</h2>
                 <p className="mt-2 text-sm text-neutral-600 dark:text-neutral-300">{error}</p>
                 <button
-                  onClick={() => setRetryCount((count) => count + 1)}
+                  onClick={retry}
                   className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-red-700 px-5 text-sm font-bold text-white transition-colors hover:bg-red-600"
                 >
                   <IoReloadOutline className="h-5 w-5" aria-hidden="true" />
@@ -230,6 +204,6 @@ export default function PdfPage() {
 
         <Navbar />
       </div>
-    </ProtectedRoutes>
+    </>
   );
 }

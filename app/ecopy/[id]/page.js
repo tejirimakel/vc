@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Document, Page } from "react-pdf";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
@@ -13,6 +13,7 @@ import {
 import Navbar from "@/components/nav";
 import Link from "next/link";
 import { configurePdfWorker } from "@/lib/pdfConfig";
+import { useContainerWidth } from "@/lib/useContainerWidth";
 import 'react-pdf/dist/Page/TextLayer.css';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
 
@@ -33,19 +34,12 @@ export default function EcopyDetailPage() {
 
   const [numPages, setNumPages] = useState(null);
   const [pageNumber, setPageNumber] = useState(1);
-  const [containerWidth, setContainerWidth] = useState(345);
+  const containerWidth = useContainerWidth(containerRef);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const element = containerRef.current;
-    if (!element) return;
-
-    const observer = new ResizeObserver(([entry]) => {
-      setContainerWidth(Math.min(entry.contentRect.width, 820));
-    });
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
+  // Disable pdf.js's eval-based code path so the page works under a CSP without
+  // 'unsafe-eval'. Memoized so <Document> doesn't reload on every render.
+  const pdfOptions = useMemo(() => ({ isEvalSupported: false }), []);
 
   const goPrevious = () => setPageNumber((page) => Math.max(page - 1, 1));
   const goNext = () => setPageNumber((page) => Math.min(page + 1, numPages || page));
@@ -143,6 +137,7 @@ export default function EcopyDetailPage() {
           >
             <Document
               file={proxiedUrl}
+              options={pdfOptions}
               onLoadSuccess={({ numPages: pages }) => {
                 setNumPages(pages);
                 setPageNumber((page) => Math.min(page, pages));

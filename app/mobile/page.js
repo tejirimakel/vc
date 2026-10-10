@@ -2,13 +2,14 @@
 
 import Navbar from "@/components/nav";
 import SplashScreen from "@/components/splash";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { MdOutlineFeed } from "react-icons/md";
 import {
   IoAlertCircleOutline,
   IoChevronForward,
+  IoCloseOutline,
   IoNewspaperOutline,
   IoReloadOutline,
   IoSearchOutline,
@@ -18,34 +19,11 @@ import SearchOverlay from "@/components/searchOverlay";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import "swiper/css";
-import ProtectedRoutes from "@/components/protectedRoutes";
-import { decode } from "he";
+import { cleanText, cutTitle, makeExcerpt } from "@/lib/text";
+import { formatDate } from "@/lib/format";
+import { useFetch } from "@/lib/useFetch";
 
-const cleanText = (value = "") =>
-  decode(String(value))
-    .replace(/<[^>]*>/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-
-const makeExcerpt = (value) => {
-  const text = cleanText(value);
-  if (!text) return "Open the full story.";
-  const words = text.split(" ");
-  return words.slice(0, 10).join(" ") + (words.length > 16 ? "..." : "");
-};
-
-const cutTitle = (value, limit = 14) => {
-  const text = cleanText(value);
-  const words = text.split(" ");
-  return words.slice(0, limit).join(" ") + (words.length > limit ? "..." : "");
-};
-
-const formatDate = (dateString) => {
-  if (!dateString) return "Latest";
-  const date = new Date(dateString);
-  if (Number.isNaN(date.getTime())) return "Latest";
-  return new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(date);
-};
+const EMPTY = [];
 
 function FeedSkeleton() {
   return (
@@ -80,37 +58,21 @@ function FeedSkeleton() {
 }
 
 export default function MobileHome() {
-  const [newsFeed, setNewsFeed] = useState([]);
-  const [categories, setCategories] = useState(["All"]);
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [trendingNews, setTrendingNews] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [retryCount, setRetryCount] = useState(0);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    async function fetchData() {
-      setLoading(true);
-      setError(null);
+  const { data, loading, error, retry } = useFetch("/api/news", {
+    select: (body) => ({
+      newsFeed: body.newsFeed ?? [],
+      categories: ["All", ...(body.categories ?? []).filter((category) => category !== "All")],
+      trendingNews: body.trendingNews ?? [],
+    }),
+  });
 
-      try {
-        const response = await fetch("/api/news");
-        if (!response.ok) throw new Error("Failed to fetch news");
-        const data = await response.json();
-        setNewsFeed(data.newsFeed ?? []);
-        setCategories(["All", ...(data.categories ?? []).filter((category) => category !== "All")]);
-        setTrendingNews(data.trendingNews ?? []);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchData();
-  }, [retryCount]);
+  const newsFeed = data?.newsFeed ?? EMPTY;
+  const categories = data?.categories ?? ["All"];
+  const trendingNews = data?.trendingNews ?? EMPTY;
 
   const featuredNews = useMemo(
     () => (trendingNews.length ? trendingNews : newsFeed.slice(0, 3)),
@@ -132,10 +94,8 @@ export default function MobileHome() {
       .slice(0, 10);
   }, [newsFeed, searchQuery, selectedCategory]);
 
-  const handleRetry = () => setRetryCount((count) => count + 1);
-
   return (
-    <ProtectedRoutes>
+    <>
       <SplashScreen />
 
       <div className="min-h-screen bg-[#f5f7fb] text-neutral-950 dark:bg-[#07080c] dark:text-neutral-50">
@@ -151,7 +111,7 @@ export default function MobileHome() {
               Check your connection and try again. Saved pages may still be available offline.
             </p>
             <button
-              onClick={handleRetry}
+              onClick={retry}
               className="mt-6 inline-flex h-12 items-center justify-center gap-2 rounded-full bg-red-700 px-6 text-sm font-bold text-white shadow-lg shadow-red-700/20 transition-colors hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-700/35"
             >
               <IoReloadOutline className="h-5 w-5" aria-hidden="true" />
@@ -230,7 +190,7 @@ export default function MobileHome() {
                               {cutTitle(news.title, 13)}
                             </h2>
                             <p className="mt-3 text-sm leading-6 text-neutral-200">
-                              {makeExcerpt(news.excerpt)}
+                              {makeExcerpt(news.excerpt, { words: 10, fallback: "Open the full story." })}
                             </p>
                           </div>
                         </article>
@@ -254,7 +214,7 @@ export default function MobileHome() {
                       }`}
                     >
                       <MdOutlineFeed className="h-4 w-4" aria-hidden="true" />
-                      {category.split(" ")[0]}
+                      {category}
                     </button>
                   );
                 })}
@@ -276,6 +236,20 @@ export default function MobileHome() {
                 </Link>
               </div>
 
+              {searchQuery.trim() && (
+                <p className="mt-3 inline-flex max-w-full items-center gap-2 rounded-full border border-black/10 bg-white py-1 pl-3 pr-1 text-xs font-bold text-neutral-700 shadow-sm dark:border-white/10 dark:bg-white/10 dark:text-neutral-200">
+                  <span className="min-w-0 truncate" title={searchQuery.trim()}>Search: {searchQuery.trim()}</span>
+                  <button
+                    type="button"
+                    onClick={() => setSearchQuery("")}
+                    aria-label="Clear search filter"
+                    className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full transition-colors hover:bg-neutral-100 dark:hover:bg-white/10"
+                  >
+                    <IoCloseOutline className="h-4 w-4" aria-hidden="true" />
+                  </button>
+                </p>
+              )}
+
               <ul className="mt-3 space-y-3">
                 {filteredNews.length > 0 ? (
                   filteredNews.map((news) => (
@@ -294,10 +268,10 @@ export default function MobileHome() {
                         />
                         <div className="min-w-0 flex-1">
                           <h3 className="text-sm font-bold leading-5 text-neutral-950 dark:text-neutral-100">
-                            {cutTitle(news.title)}
+                            {cutTitle(news.title, 14)}
                           </h3>
                           <p className="mt-2 text-xs leading-5 text-neutral-600 dark:text-neutral-300">
-                            {makeExcerpt(news.excerpt)}
+                            {makeExcerpt(news.excerpt, { words: 10, fallback: "Open the full story." })}
                           </p>
                           <p className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-neutral-500 dark:text-neutral-400">
                             <IoTimeOutline className="h-4 w-4" aria-hidden="true" />
@@ -325,6 +299,6 @@ export default function MobileHome() {
         />
         <Navbar />
       </div>
-    </ProtectedRoutes>
+    </>
   );
 }

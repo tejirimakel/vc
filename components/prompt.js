@@ -3,11 +3,32 @@
 import { useEffect, useState } from "react"
 import { IoClose } from "react-icons/io5"
 import { isInstalledPwa } from "@/lib/pwaDisplayMode"
+import { requestPwaAccess } from "@/lib/pwaClient"
+import { useConsent } from "@/components/consent/ConsentProvider"
 
-const COOKIE_FLAGS = "; path=/; max-age=604800; SameSite=Lax; Secure"
-const INSTALLED_FLAGS = "; path=/; max-age=31536000; SameSite=Lax; Secure"
+const DISMISSED_KEY = "pwa-install-dismissed"
+const DISMISS_MS = 7 * 24 * 60 * 60 * 1000
+
+function wasDismissedRecently() {
+  try {
+    const dismissedAt = Number(localStorage.getItem(DISMISSED_KEY))
+    return dismissedAt > 0 && Date.now() - dismissedAt < DISMISS_MS
+  } catch {
+    // Storage blocked: treat as not dismissed.
+    return false
+  }
+}
+
+function rememberDismissed() {
+  try {
+    localStorage.setItem(DISMISSED_KEY, String(Date.now()))
+  } catch {
+    // Best effort; the prompt is still hidden for this page view.
+  }
+}
 
 export default function InstallPrompt() {
+  const { status, ready } = useConsent()
   const [deferredPrompt, setDeferredPrompt] = useState(null)
   const [visible, setVisible] = useState(false)
   const [isStandalone, setIsStandalone] = useState(false)
@@ -19,7 +40,7 @@ export default function InstallPrompt() {
     setIsStandalone(standalone)
     if (standalone) return
 
-    if (document.cookie.includes("pwa-install-dismissed=true")) return
+    if (wasDismissedRecently()) return
 
     const ios = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase())
     setIsIos(ios)
@@ -44,11 +65,7 @@ export default function InstallPrompt() {
     deferredPrompt.prompt()
     const choiceResult = await deferredPrompt.userChoice
     if (choiceResult.outcome === "accepted") {
-      document.cookie = "pwa-installed=true" + INSTALLED_FLAGS
-      await fetch("/api/pwa/access", {
-        method: "POST",
-        headers: { "x-tvc-pwa-launch": "install-accepted" },
-      }).catch((error) => {
+      await requestPwaAccess("install-accepted").catch((error) => {
         console.error("PWA access failed:", error)
       })
     }
@@ -57,11 +74,15 @@ export default function InstallPrompt() {
   }
 
   const handleClose = () => {
-    document.cookie = "pwa-install-dismissed=true" + COOKIE_FLAGS
+    rememberDismissed()
     setVisible(false)
   }
 
-  if (!visible || isStandalone) return null
+  // Wait until the visitor has answered the cookie banner: both sit at the
+  // bottom of the screen, and the banner would cover this prompt.
+  const consentAnswered = ready && status !== null
+
+  if (!visible || isStandalone || !consentAnswered) return null
 
   return (
     <div className="fixed bottom-0 left-0 w-full rounded-t-2xl bg-gray-950 text-white px-4 py-6 shadow-lg z-50">
